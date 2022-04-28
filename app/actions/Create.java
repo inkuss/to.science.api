@@ -152,7 +152,8 @@ public class Create extends RegalAction {
 			ToScienceObject object) {
 		Node node = initNode(id, namespace, object);
 		updateResource(node, object);
-		updateIndex(node.getPid());
+		// updateIndex(node.getPid()); # hier doppelt; wurde schon in updateResource
+		// aufgerufen
 		return node;
 	}
 

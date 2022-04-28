@@ -138,6 +138,8 @@ public class Search {
 			play.Logger.info("Search.index: Index updated successfully!");
 			return response;
 		} catch (Exception e) {
+			play.Logger.warn("E-Mail schicken für EDOZWO-1107");
+			// Email schicken für EDOZWO-1107
 			throw new SearchException(
 					"Failed to index " + index + "," + type + "," + id, e);
 		}
@@ -180,9 +182,12 @@ public class Search {
 		if (!indexExists(index)) {
 			init(index);
 		}
+		play.Logger.debug("Search.index: delete from index:" + index + ", type:"
+				+ type + ", id:" + id);
 		ActionResponse response =
 				client.prepareDelete(index, type, id).execute().actionGet();
 		refresh();
+		play.Logger.info("Search.index: Deleted from index successfully!");
 		return response;
 	}
 
