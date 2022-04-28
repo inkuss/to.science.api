@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import helper.mail.Mail;
 import models.Globals;
 import models.Node;
 
@@ -134,12 +135,17 @@ public class Search {
 					+ ", type:" + type + ", id:" + id);
 			ActionResponse response = client.prepareIndex(index, type, id)
 					.setSource(data).execute().actionGet();
+			int error = 1 / 0;
 			refresh();
 			play.Logger.info("Search.index: Index updated successfully!");
 			return response;
 		} catch (Exception e) {
 			play.Logger.warn("E-Mail schicken für EDOZWO-1107");
-			// Email schicken für EDOZWO-1107
+			helper.mail.Mail.sendMail(
+					"Objekt " + Globals.protocol + Globals.server + "/resource/" + id
+							+ " vom Typ " + type + " konnte zum Index " + index
+							+ " nicht hinzugefügt werden !!!\nBehebungsvorschlag: Bitte speichern Sie das Objekt einmal manuell erneut ab:\nReiter Bearbeiten -- Titel erneut eingeben oder importieren -- Speichern (Save)",
+					"Edoweb: FEHLER bei der Indexierung von " + id);
 			throw new SearchException(
 					"Failed to index " + index + "," + type + "," + id, e);
 		}
