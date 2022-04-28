@@ -121,6 +121,7 @@ public class Index {
 	 * @return a message
 	 */
 	public String index(Node n) {
+		play.Logger.debug("Ressource mit PID " + n.getPid() + " wird indexiert.");
 		String namespace = n.getNamespace();
 		String pid = n.getPid();
 		String type = n.getContentType();

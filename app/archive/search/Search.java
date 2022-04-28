@@ -130,9 +130,12 @@ public class Search {
 				play.Logger.info("Create new Index " + index);
 				init(index);
 			}
+			play.Logger.debug("Search.index: update index for index:" + index
+					+ ", type:" + type + ", id:" + id);
 			ActionResponse response = client.prepareIndex(index, type, id)
 					.setSource(data).execute().actionGet();
 			refresh();
+			play.Logger.info("Search.index: Index updated successfully!");
 			return response;
 		} catch (Exception e) {
 			throw new SearchException(
