@@ -205,26 +205,34 @@ public class Resource extends MyController {
 	}
 
 	@ApiOperation(produces = "application/rdf+xml,text/plain", nickname = "asRdf", value = "asRdf", notes = "Returns a rdf display of the resource", response = Message.class, httpMethod = "GET")
+	/**
+	 * Diese Methode wird vom Drupal-Teil editTab.php aufgerufen. Das Ergebnis
+	 * (RDF) wird im Formular (to.science.forms) angezeigt. Lt. Andres liefert
+	 * diese Methode nur ein abgespecktes RDF, weil "Jan der Meinung war, dass es
+	 * (hier) klein gehalten werden muss". Für orca-162 "alle Formularfelder
+	 * müssen in ORCA editierbar sein" wird jedoch hier ein vollständiges RDF
+	 * benötigt. Kuss 03.05.2022: Ich schreibe diese Methode so um, dass sie das
+	 * gleiche RDF liefert wie der Endpoint GET /metadata2
+	 * 
+	 * @param pid
+	 * @return
+	 */
 	public static Promise<Result> asRdf(@PathParam("pid") String pid) {
 		return new ReadMetadataAction().call(pid, node -> {
 			try {
-				String result = "";
-				Map<String, Object> rdf = node.getLd2();
-				rdf.put("@context", Globals.profile.getContext().get("@context"));
-				String jsonString = JsonUtil.mapper().writeValueAsString(rdf);
-
+				String result = read.readMetadata2(node, null);
+				InputStream in = new ByteArrayInputStream(result.getBytes("utf-8"));
+				String rdf = null;
 				if (request().accepts("application/rdf+xml")) {
-					result = RdfUtils.readRdfToString(
-							new ByteArrayInputStream(jsonString.getBytes("utf-8")),
-							RDFFormat.JSONLD, RDFFormat.RDFXML, node.getAggregationUri());
+					rdf = RdfUtils.readRdfToString(in, RDFFormat.NTRIPLES,
+							RDFFormat.RDFXML, "");
 					response().setContentType("application/rdf+xml");
-					return ok(result);
+					return ok(rdf);
 				} else if (request().accepts("text/plain")) {
-					result = RdfUtils.readRdfToString(
-							new ByteArrayInputStream(jsonString.getBytes("utf-8")),
-							RDFFormat.JSONLD, RDFFormat.NTRIPLES, node.getAggregationUri());
+					rdf = RdfUtils.readRdfToString(in, RDFFormat.NTRIPLES,
+							RDFFormat.NTRIPLES, "");
 					response().setContentType("text/plain");
-					return ok(result);
+					return ok(rdf);
 				}
 				return JsonMessage(new Message(result));
 			} catch (Exception e) {
