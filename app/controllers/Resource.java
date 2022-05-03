@@ -225,12 +225,12 @@ public class Resource extends MyController {
 				String rdf = null;
 				if (request().accepts("application/rdf+xml")) {
 					rdf = RdfUtils.readRdfToString(in, RDFFormat.NTRIPLES,
-							RDFFormat.RDFXML, "");
+							RDFFormat.RDFXML, node.getAggregationUri());
 					response().setContentType("application/rdf+xml");
 					return ok(rdf);
 				} else if (request().accepts("text/plain")) {
 					rdf = RdfUtils.readRdfToString(in, RDFFormat.NTRIPLES,
-							RDFFormat.NTRIPLES, "");
+							RDFFormat.NTRIPLES, node.getAggregationUri());
 					response().setContentType("text/plain");
 					return ok(rdf);
 				}
