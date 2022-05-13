@@ -956,10 +956,15 @@ public class Modify extends RegalAction {
 			File file = CopyUtils.copyStringToFile(content);
 			if (node != null) {
 				node.setUrlHistFile(file.getAbsolutePath());
-				play.Logger.info("Update node" + file.getAbsolutePath());
-				Globals.fedora.updateNode(node);
+				play.Logger.info("Set URL History File: " + file.getAbsolutePath());
+				/**
+				 * KS20220513 für EDOZWO-1107: updateNode und updateIndex hier NICHT
+				 * machen, da updateUrlHist immer direkt von updateConf gefolgt wird.
+				 * Vermeidung doppelter Update- und doppelter Indexier-Aktionen !!
+				 */
+				// Globals.fedora.updateNode(node);
 			}
-			updateIndex(node.getPid());
+			// updateIndex(node.getPid());
 			return node.getPid() + " url history updated!";
 		} catch (RdfException e) {
 			throw new HttpArchiveException(400, e);

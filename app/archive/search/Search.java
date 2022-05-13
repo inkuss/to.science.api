@@ -141,10 +141,10 @@ public class Search {
 			return response;
 		} catch (Exception e) {
 			play.Logger.warn("E-Mail schicken für EDOZWO-1107");
-			helper.mail.Mail.sendMail(
-					"Objekt " + Globals.protocol + Globals.server + "/resource/" + id
-							+ " vom Typ " + type + " konnte zum Index " + index
-							+ " nicht hinzugefügt werden !!!\nBehebungsvorschlag: Bitte speichern Sie das Objekt einmal manuell erneut ab:\nReiter Bearbeiten -- Titel erneut eingeben oder importieren -- Speichern (Save)",
+			helper.mail.Mail.sendMail("Objekt " + Globals.protocol + Globals.server
+					+ "/resource/" + id + " vom Typ " + type + " konnte zum Index "
+					+ index
+					+ " nicht hinzugefügt werden !!!\nBehebungsvorschlag: Bitte speichern Sie das Objekt einmal manuell erneut ab:\nReiter Bearbeiten -- Titel erneut eingeben oder importieren -- Speichern (Save)",
 					"Edoweb: FEHLER bei der Indexierung von " + id);
 			throw new SearchException(
 					"Failed to index " + index + "," + type + "," + id, e);
@@ -185,16 +185,29 @@ public class Search {
 	}
 
 	ActionResponse delete(String id, String index, String type) {
-		if (!indexExists(index)) {
-			init(index);
+		try {
+			if (!indexExists(index)) {
+				play.Logger.info("Create new Index " + index);
+				init(index);
+			}
+			play.Logger.debug("Search.index: delete from index:" + index + ", type:"
+					+ type + ", id:" + id);
+			ActionResponse response =
+					client.prepareDelete(index, type, id).execute().actionGet();
+			int error = 1 / 0;
+			refresh();
+			play.Logger.info("Search.index: Deleted from index successfully!");
+			return response;
+		} catch (Exception e) {
+			play.Logger.warn("E-Mail schicken für EDOZWO-1107");
+			helper.mail.Mail.sendMail("Objekt " + Globals.protocol + Globals.server
+					+ "/resource/" + id + " vom Typ " + type + " konnte aus Index "
+					+ index
+					+ " nicht gelöscht werden !!!\nBehebungsvorschlag: Wenn Sie das Objekt wirklich löschen wollten, versuchen Sie es bitte erneut.\nFalls sie das Objekt nur aktualisieren oder modifizieren wollten, sind keine Aktionen erforderlich.",
+					"Edoweb: FEHLER bei der Indexierung von " + id);
+			throw new SearchException(
+					"Failed to index " + index + "," + type + "," + id, e);
 		}
-		play.Logger.debug("Search.index: delete from index:" + index + ", type:"
-				+ type + ", id:" + id);
-		ActionResponse response =
-				client.prepareDelete(index, type, id).execute().actionGet();
-		refresh();
-		play.Logger.info("Search.index: Deleted from index successfully!");
-		return response;
 	}
 
 	SearchHits query(String index, String fieldName, String fieldValue) {

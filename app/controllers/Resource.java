@@ -150,13 +150,11 @@ public class Resource extends MyController {
 		} catch (Exception e) {
 			return Promise.promise(new Function0<Result>() {
 
-				public Result apply() {
-					return JsonMessage(new Message(e, 500));
-				}
-
-			});
-		}
+	public Result apply() {
+		return JsonMessage(new Message(e, 500));
 	}
+
+	});}}
 
 	private static Promise<Result> jsonList(String namespace, String contentType,
 			int from, int until) {
@@ -1078,7 +1076,6 @@ public class Resource extends MyController {
 					conf.setName(pid);
 					conf.setRobotsPolicy(RobotsPolicy.ignore);
 					play.Logger.debug("conf.toString=" + conf.toString());
-					String result = modify.updateConf(node, conf.toString());
 					// Neue urlHist anlegen, falls es noch keine gibt (nur dann)
 					if (node.getUrlHist() == null) {
 						UrlHist urlHist = new UrlHist(conf.getUrl());
@@ -1086,6 +1083,7 @@ public class Resource extends MyController {
 								modify.updateUrlHist(node, urlHist.toString());
 						play.Logger.debug("URL-Historie neu angelegt: " + urlHistResult);
 					}
+					String result = modify.updateConf(node, conf.toString());
 					Globals.heritrix.createJobDir(conf);
 					return JsonMessage(new Message(result, 200));
 				} else {
@@ -1447,7 +1445,7 @@ public class Resource extends MyController {
 						play.Logger.warn(msg);
 					}
 					play.Logger.debug("urlHist überprüft.");
-					urlHist.updateLatestUrlHistEntry(new Date());
+					urlHist.updateLatestUrl}HistEntry(new Date());
 					urlHist.addUrlHistEntry(urlNew);
 					String urlHistResult = modify.updateUrlHist(node, urlHist.toString());
 					play.Logger.info("URL-Historie aktualsiert: " + urlHistResult);
@@ -1465,5 +1463,4 @@ public class Resource extends MyController {
 				return JsonMessage(new Message(json(e)));
 			}
 		});
-	}
-}
+}}
