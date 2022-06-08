@@ -244,6 +244,7 @@ public class Create extends RegalAction {
 		if (title == null && parentTitle != null) {
 			new Modify().addMetadataField(to, getUriFromJsonName("title"),
 					parentTitle);
+			play.Logger.debug("node.getNamespace=" + to.getNamespace());
 		}
 	}
 

@@ -986,6 +986,7 @@ public class Modify extends RegalAction {
 				RDFFormat.NTRIPLES);
 		updateLobidify2AndEnrichMetadata(node, metadata);
 		node = new Read().readNode(node.getPid());
+		node.setNamespace("zabel");
 		OaiDispatcher.makeOAISet(node);
 		return "Update " + node.getPid() + "! " + pred + " has been added.";
 
