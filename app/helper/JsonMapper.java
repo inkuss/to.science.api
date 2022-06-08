@@ -447,6 +447,7 @@ public class JsonMapper {
 			postProcessLinkFields("publisherVersion", rdf);
 			postProcessLinkFields("fulltextVersion", rdf);
 			createJoinedFunding(rdf);
+			applyAffiliations(rdf);
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
@@ -539,28 +540,51 @@ public class JsonMapper {
 		rdf.put("fundingId", fundingId);
 	}
 
+	/**
+	 * Diese Methode bildet serialisierte "Affiliations" (Organisationen oder
+	 * Institute, die einer Person zugeordnet sind ), die z.B. aus einem Formular
+	 * stammen, in die RDF-Strukturen "Creator" bzw. "Contributor" ab.
+	 * 
+	 * @autor I. Kuss, hbz
+	 * @param rdf Die Metadaten (an einer Ressource) im Format RDF
+	 */
 	private void applyAffiliations(Map<String, Object> rdf) {
-		// serialisierte Affiliations
+		// serialisierte Affiliations (z.B. aus Formular)
 		List<Map<String, Object>> affiliations = new ArrayList<>();
 		if (rdf.containsKey("affiliation")) {
 			affiliations = (List<Map<String, Object>>) rdf.get("affiliation");
 		}
 
+		int i = 0; // Iterator für die serialisierten Affiliations
 		if (rdf.containsKey("creator")) {
-			List<Map<String, Object>> creatorListWithAffiliations = new ArrayList<>();
 			Object creatorList = rdf.get("creator");
-			int i = 0;
 			Iterator<Map<String, Object>> cit = getLobid2Iterator(creatorList);
 			while (cit.hasNext()) {
 				i++;
 				Map<String, Object> creator = cit.next();
-				HashMap<String, String> affiliation = new HashMap<>();
+				Map<String, Object> affiliation = new LinkedHashMap<>();
 				affiliation.put(ID2, affiliations.get(i).get(ID2));
-				affiliation.put(ID2, affiliations.get(i).get(ID2));
-				play.Logger.debug("found affiliation: " + affiliationSer.get(i)
-						+ " on position " + i);
+				affiliation.put(PREF_LABEL, affiliations.get(i).get(PREF_LABEL));
+				affiliation.put("type", affiliations.get(i).get("type"));
+				play.Logger.debug("found affiliation: "
+						+ affiliations.get(i).get(PREF_LABEL) + " on position " + i);
 				creator.put("affiliation", affiliation);
-				creatorListWithAffiliation.add();
+			}
+		}
+
+		if (rdf.containsKey("contributor")) {
+			Object contributorList = rdf.get("contributor");
+			Iterator<Map<String, Object>> cit = getLobid2Iterator(contributorList);
+			while (cit.hasNext()) {
+				i++;
+				Map<String, Object> contributor = cit.next();
+				Map<String, Object> affiliation = new LinkedHashMap<>();
+				affiliation.put(ID2, affiliations.get(i).get(ID2));
+				affiliation.put(PREF_LABEL, affiliations.get(i).get(PREF_LABEL));
+				affiliation.put("type", affiliations.get(i).get("type"));
+				play.Logger.debug("found affiliation: "
+						+ affiliations.get(i).get(PREF_LABEL) + " on position " + i);
+				contributor.put("affiliation", affiliation);
 			}
 		}
 
@@ -831,7 +855,6 @@ public class JsonMapper {
 
 		if (map.containsKey("preferredNameForTheWork"))
 			return (String) map.get("preferredNameForTheWork");
-
 		if (map.containsKey("preferredNameForThePerson"))
 			return (String) map.get("preferredNameForThePerson");
 
