@@ -540,21 +540,27 @@ public class JsonMapper {
 	}
 
 	private void applyAffiliations(Map<String, Object> rdf) {
-		List<String> affiliation = (List<String>) rdf.get("affiliation");
+		// serialisierte Affiliations
+		List<Map<String, Object>> affiliations = new ArrayList<>();
+		if (rdf.containsKey("affiliation")) {
+			affiliations = (List<Map<String, Object>>) rdf.get("affiliation");
+		}
 
 		if (rdf.containsKey("creator")) {
-			Object creatorMap = rdf.get("creator");
+			List<Map<String, Object>> creatorListWithAffiliations = new ArrayList<>();
+			Object creatorList = rdf.get("creator");
 			int i = 0;
-			Iterator cit = getLobid2Iterator(creatorMap);
+			Iterator<Map<String, Object>> cit = getLobid2Iterator(creatorList);
 			while (cit.hasNext()) {
 				i++;
-				Map<String, Object> creator = (Map<String, Object>) cit.next();
-				HashMap<String, String> affiliationId = new HashMap<>();
-				affiliationId.put("@id", affiliation.get(i));
-				play.Logger.debug(
-						"found affiliation: " + affiliation.get(i) + " on position " + i);
-				// creator.put("affiliation", )
-
+				Map<String, Object> creator = cit.next();
+				HashMap<String, String> affiliation = new HashMap<>();
+				affiliation.put(ID2, affiliations.get(i).get(ID2));
+				affiliation.put(ID2, affiliations.get(i).get(ID2));
+				play.Logger.debug("found affiliation: " + affiliationSer.get(i)
+						+ " on position " + i);
+				creator.put("affiliation", affiliation);
+				creatorListWithAffiliation.add();
 			}
 		}
 
