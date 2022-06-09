@@ -28,6 +28,7 @@ import java.util.Map;
 
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import actions.Read;
@@ -209,86 +210,26 @@ public class LRMIMapper {
 				lrmiJsonContent.put("learningResourceType", arr);
 			}
 
-			if (node.getLd2().containsKey("creator")) {
-				play.Logger.debug("map creator object from json2 to lrmi");
-				arr = new JSONArray();
-				iterator = getLobid2Iterator(node.getLd2().get("creator"));
-				while (iterator.hasNext()) {
-					map = (Map<String, Object>) iterator.next();
-					obj = new JSONObject();
-					obj.put("name", map.get("prefLabel"));
-					obj.put("id", map.get("@id"));
-					obj.put("type", map.get("type"));
-					obj.put("honoricPrefix", map.get("academicDegree"));
-					if (map.containsKey("affiliation")) {
-						play.Logger.debug("found affiliation in json2");
-						Iterator aIterator = getLobid2Iterator(map.get("affilitation"));
-						while (aIterator.hasNext()) {
-							Map aMap = (Map<String, Object>) aIterator.next();
-							JSONObject aObj = new JSONObject();
-							aObj.put("name", aMap.get("prefLabel"));
-							aObj.put("id", aMap.get("@id"));
-							aObj.put("type", "Organization");
-							obj.put("affiliation", aObj);
-							break; // es gibt nur eine Affiliation pro Autor (?)
-						}
-					}
-					arr.put(obj);
-				}
-				lrmiJsonContent.put("creator", arr);
-			}
-
 			if (rdf.containsKey("creator")) {
 				play.Logger.debug("map creator object from rdf to lrmi");
-				iterator = getLobid2Iterator(rdf.get("creator"));
 				arr = new JSONArray();
+				iterator = getLobid2Iterator(rdf.get("creator"));
 				while (iterator.hasNext()) {
-					map = (Map<String, Object>) iterator.next();
-					obj = new JSONObject();
-					obj.put("name", map.get("prefLabel"));
-					obj.put("id", map.get("@id"));
-					obj.put("type", "Person"); /* guess */
-					obj.put("honoricPrefix", map.get("academicDegree"));
-					Iterator mIterator = null;
-					if (map.containsKey("affiliation")) {
-						play.Logger.debug("key affiliation found in rdf");
-						mIterator = getLobid2Iterator(map.get("affiliation"));
-					}
-					if (mIterator != null) {
-						while (mIterator.hasNext()) {
-							play.Logger.debug("found affiliation in rdf");
-							Map aMap = (Map<String, Object>) mIterator.next();
-							JSONObject mObj = new JSONObject();
-							mObj.put("name", aMap.get("prefLabel"));
-							mObj.put("id", aMap.get("@id"));
-							mObj.put("type", "Organization"); /* guess */
-							obj.put("affiliation", mObj);
-						}
-					} else {
-						play.Logger.warn("found no affiliation associated with creator");
-						JSONObject dummyObj = new JSONObject();
-						dummyObj.put("name", "Example Affiliation");
-						dummyObj.put("id", "https://example.org");
-						dummyObj.put("type", "Organization"); /* guess */
-						obj.put("affiliation", dummyObj);
-					}
+					Map<String, Object> creator = (Map<String, Object>) iterator.next();
+					obj = buildPersonJsonObject(creator);
 					arr.put(obj);
 				}
 				lrmiJsonContent.put("creator", arr);
-
 			}
 
-			if (rdf.containsKey("contributor"))
-
-			{
-				iterator = getLobid2Iterator(rdf.get("contributor"));
+			if (rdf.containsKey("contributor")) {
+				play.Logger.debug("map contributor object from rdf to lrmi");
 				arr = new JSONArray();
+				iterator = getLobid2Iterator(rdf.get("contributor"));
 				while (iterator.hasNext()) {
-					map = (Map<String, Object>) iterator.next();
-					obj = new JSONObject();
-					obj.put("name", map.get("prefLabel"));
-					obj.put("id", map.get("@id"));
-					obj.put("type", "Person"); /* guess; can't match if id is absent */
+					Map<String, Object> contributor =
+							(Map<String, Object>) iterator.next();
+					obj = buildPersonJsonObject(contributor);
 					arr.put(obj);
 				}
 				lrmiJsonContent.put("contributor", arr);
@@ -400,6 +341,39 @@ public class LRMIMapper {
 			lIterator = jHashSet.iterator();
 		}
 		return lIterator;
+	}
+
+	/**
+	 * Baut LRMI-JSON-Object für einen Autor (creator) oder Mitwirkenden
+	 * (contributor). Könnte man auch für andere Personentypen (other) verwenden.
+	 * 
+	 * @param person Die Personendaten im Format RDF
+	 * @return Das JSON-Object im Format LRMI-JSON
+	 */
+	@SuppressWarnings("static-method")
+	private JSONObject buildPersonJsonObject(Map<String, Object> person)
+			throws JSONException {
+		JSONObject obj = new JSONObject();
+		obj.put("name", person.get("prefLabel"));
+		obj.put("id", person.get("@id"));
+		obj.put("type", person.get("type"));
+		obj.put("honoricPrefix", person.get("academicDegree"));
+		if (person.containsKey("affiliation")) {
+			play.Logger.debug(
+					"found affiliation in rdf for person " + person.get("prefLabel"));
+			Map<String, Object> affiliation =
+					(Map<String, Object>) person.get("affiliation");
+			JSONObject aObj = new JSONObject();
+			aObj.put("name", affiliation.get("prefLabel"));
+			aObj.put("id", affiliation.get("@id"));
+			if (affiliation.containsKey("type")) {
+				aObj.put("type", affiliation.get("type"));
+			} else {
+				aObj.put("type", "Organization");
+			}
+			obj.put("affiliation", aObj);
+		}
+		return obj;
 	}
 
 	/**
