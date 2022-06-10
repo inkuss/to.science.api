@@ -135,7 +135,7 @@ public class Search {
 					+ ", type:" + type + ", id:" + id);
 			ActionResponse response = client.prepareIndex(index, type, id)
 					.setSource(data).execute().actionGet();
-			int error = 1 / 0;
+			// int error = 1 / 0; # Fehler + E-Mail provozieren
 			refresh();
 			play.Logger.info("Search.index: Index updated successfully!");
 			return response;
