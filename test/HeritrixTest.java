@@ -32,7 +32,7 @@ public class HeritrixTest {
 				String pid = "test:1234";
 				ToScienceObject object = new ToScienceObject();
 				object.setContentType("webpage");
-				Node webpage = create.createResource("test", object);
+				Node webpage = create.createResource("test", object, true);
 				play.Logger.debug(webpage.getPid());
 				Gatherconf conf = new Gatherconf();
 				conf.setUrl("https://schnasse.eu");

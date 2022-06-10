@@ -49,7 +49,7 @@ public class OaiDispatcher {
 	 * @param node the node to be published on the oai interface
 	 * @return A short message.
 	 */
-	public static String makeOAISet(Node node) {
+	public static String makeOAISet(Node node, boolean doIndex) {
 		try {
 			play.Logger.info("Connect transformer to " + node.getPid());
 			updateTransformer(null, node);
@@ -59,7 +59,8 @@ public class OaiDispatcher {
 			createUrnSets(node);
 			createAlephSet(node);
 			createContentTypeSet(node);
-			new Modify().updateIndex(node.getPid());
+			if (doIndex == true)
+				new Modify().updateIndex(node.getPid());
 			return node.getPid() + " successfully created oai sets!";
 		} catch (Exception e) {
 			throw new RuntimeException(e);

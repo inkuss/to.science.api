@@ -274,10 +274,10 @@ public class MyUtils extends MyController {
 				Node webpage = null;
 				try {
 					Node node = read.readNode(pid);
-					webpage = new Create().updateResource(node, object);
+					webpage = new Create().updateResource(node, object, true);
 				} catch (Exception e) {
-					webpage =
-							new Create().createResource(conf.getId(), namespace, object);
+					webpage = new Create().createResource(conf.getId(), namespace, object,
+							true);
 				}
 				new actions.Modify().updateConf(webpage, conf.toString());
 				String ht = conf.getName();

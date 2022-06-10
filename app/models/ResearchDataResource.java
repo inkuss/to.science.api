@@ -352,14 +352,14 @@ public class ResearchDataResource implements java.io.Serializable {
 			prov.setName(subPath);
 			regalObject.setIsDescribedBy(prov);
 			regalObject.setParentPid(researchDataPid);
-			Node part =
-					create.createResource(researchDataNode.getNamespace(), regalObject);
+			Node part = create.createResource(researchDataNode.getNamespace(),
+					regalObject, true);
 			new Modify().updateLobidifyAndEnrichMetadata(part, "<" + part.getPid()
 					+ "> <http://purl.org/dc/terms/title> \"" + subPath + "\" .");
 			part.setAccessScheme(researchDataNode.getAccessScheme());
 			part.setPublishScheme(researchDataNode.getPublishScheme());
 			part.setLabel(subPath);
-			part = create.updateResource(part);
+			part = create.updateResource(part, true);
 			setParentNode(part);
 
 			ApplicationLogger

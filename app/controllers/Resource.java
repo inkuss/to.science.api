@@ -150,11 +150,13 @@ public class Resource extends MyController {
 		} catch (Exception e) {
 			return Promise.promise(new Function0<Result>() {
 
-	public Result apply() {
-		return JsonMessage(new Message(e, 500));
-	}
+				public Result apply() {
+					return JsonMessage(new Message(e, 500));
+				}
 
-	});}}
+			});
+		}
+	}
 
 	private static Promise<Result> jsonList(String namespace, String contentType,
 			int from, int until) {
@@ -367,9 +369,9 @@ public class Resource extends MyController {
 			if (node == null) {
 				String[] namespacePlusId = pid.split(":");
 				newNode = create.createResource(namespacePlusId[1], namespacePlusId[0],
-						object);
+						object, true);
 			} else {
-				newNode = create.updateResource(node, object);
+				newNode = create.updateResource(node, object, true);
 			}
 			result = result.concat(newNode.getPid() + " created/updated!");
 			return JsonMessage(new Message(result));
@@ -388,7 +390,7 @@ public class Resource extends MyController {
 			if (object.getContentType().equals("webpage")) {
 				object.setAccessScheme("restricted");
 			}
-			Node newNode = create.createResource(namespace, object);
+			Node newNode = create.createResource(namespace, object, true);
 			String result = newNode.getPid() + " created/updated!";
 			response().setHeader("Location", read.getHttpUriOfResource(newNode));
 			return JsonMessage(new Message(result, 200));
@@ -947,7 +949,7 @@ public class Resource extends MyController {
 	public static Promise<Result> updateOaiSets(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
-			String result = OaiDispatcher.makeOAISet(node);
+			String result = OaiDispatcher.makeOAISet(node, true);
 			response().setContentType("text/plain");
 			return JsonMessage(new Message(result));
 		});
@@ -986,7 +988,7 @@ public class Resource extends MyController {
 	public static Promise<Result> enrichMetadata2(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
-			String result = Enrich.enrichMetadata2(node);
+			String result = Enrich.enrichMetadata2(node, true);
 			return JsonMessage(new Message(json(result)));
 		});
 	}
@@ -1339,7 +1341,7 @@ public class Resource extends MyController {
 				if (pid != null && !pid.isEmpty()) {
 					node = read.readNode(pid);
 				} else {
-					node = create.createResource(namespace, object);
+					node = create.createResource(namespace, object, true);
 				}
 				String message = modify.lobidify2(node, alephId);
 				flash("message", message);
@@ -1445,7 +1447,7 @@ public class Resource extends MyController {
 						play.Logger.warn(msg);
 					}
 					play.Logger.debug("urlHist überprüft.");
-					urlHist.updateLatestUrl}HistEntry(new Date());
+					urlHist.updateLatestUrlHistEntry(new Date());
 					urlHist.addUrlHistEntry(urlNew);
 					String urlHistResult = modify.updateUrlHist(node, urlHist.toString());
 					play.Logger.info("URL-Historie aktualsiert: " + urlHistResult);
@@ -1463,4 +1465,5 @@ public class Resource extends MyController {
 				return JsonMessage(new Message(json(e)));
 			}
 		});
-}}
+	}
+}

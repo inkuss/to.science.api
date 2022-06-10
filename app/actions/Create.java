@@ -82,16 +82,19 @@ public class Create extends RegalAction {
 	 * @param object Ein ToScience-Objekt
 	 * @return the updated node
 	 */
-	public Node updateResource(Node node, ToScienceObject object) {
-		new Index().remove(node);
+	public Node updateResource(Node node, ToScienceObject object,
+			boolean doIndex) {
+		if (doIndex == true)
+			new Index().remove(node);
 		overrideNodeMembers(node, object);
-		return updateResource(node);
+		return updateResource(node, doIndex);
 	}
 
-	public Node updateResource(Node node) {
+	public Node updateResource(Node node, boolean doIndex) {
 		play.Logger.debug("Updating Node with Pid " + node.getPid());
 		Globals.fedora.updateNode(node);
-		updateIndex(node.getPid());
+		if (doIndex == true)
+			updateIndex(node.getPid());
 		return node;
 	}
 
@@ -109,7 +112,7 @@ public class Create extends RegalAction {
 		setNodeMembers(node, object);
 		WebsiteVersionPublisher wvp = new WebsiteVersionPublisher();
 		node.setLastModifyMessage(wvp.handleWebpagePublishing(node, object));
-		return updateResource(node);
+		return updateResource(node, true);
 	}
 
 	/**
@@ -133,9 +136,10 @@ public class Create extends RegalAction {
 	 * @param object Das ToScience-Objekt
 	 * @return the updated node
 	 */
-	public Node createResource(String namespace, ToScienceObject object) {
+	public Node createResource(String namespace, ToScienceObject object,
+			boolean doIndex) {
 		String pid = pid(namespace);
-		return createResource(pid.split(":")[1], namespace, object);
+		return createResource(pid.split(":")[1], namespace, object, doIndex);
 	}
 
 	/**
@@ -149,9 +153,9 @@ public class Create extends RegalAction {
 	 * @return the updated node
 	 */
 	public Node createResource(String id, String namespace,
-			ToScienceObject object) {
+			ToScienceObject object, boolean doIndex) {
 		Node node = initNode(id, namespace, object);
-		updateResource(node, object);
+		updateResource(node, object, doIndex);
 		// updateIndex(node.getPid()); # hier doppelt; wurde schon in updateResource
 		// aufgerufen
 		return node;
@@ -181,7 +185,7 @@ public class Create extends RegalAction {
 		if (object.getPublishScheme() != null)
 			node.setPublishScheme(object.getPublishScheme());
 		if (object.getParentPid() != null)
-			linkWithParent(object.getParentPid(), node);
+			linkWithParent(object.getParentPid(), node, true);
 		if (object.getIsDescribedBy() != null) {
 			if (object.getIsDescribedBy().getCreatedBy() != null)
 				node.setCreatedBy(object.getIsDescribedBy().getCreatedBy());
@@ -198,7 +202,7 @@ public class Create extends RegalAction {
 			if (object.getIsDescribedBy().getUrn() != null)
 				node.setUrn(object.getIsDescribedBy().getUrn());
 		}
-		OaiDispatcher.makeOAISet(node);
+		OaiDispatcher.makeOAISet(node, true);
 	}
 
 	private void overrideNodeMembers(Node node, ToScienceObject object) {
@@ -206,7 +210,7 @@ public class Create extends RegalAction {
 		node.setAccessScheme(object.getAccessScheme());
 		node.setPublishScheme(object.getPublishScheme());
 		if (object.getParentPid() != null) {
-			linkWithParent(object.getParentPid(), node);
+			linkWithParent(object.getParentPid(), node, false);
 		}
 		if (object.getIsDescribedBy() != null) {
 			node.setCreatedBy(object.getIsDescribedBy().getCreatedBy());
@@ -216,7 +220,7 @@ public class Create extends RegalAction {
 			node.setDoi(object.getIsDescribedBy().getDoi());
 			node.setUrn(object.getIsDescribedBy().getUrn());
 		}
-		OaiDispatcher.makeOAISet(node);
+		OaiDispatcher.makeOAISet(node, false);
 	}
 
 	private static void setNodeType(String type, Node node) {
@@ -224,14 +228,15 @@ public class Create extends RegalAction {
 		node.setContentType(type);
 	}
 
-	private void linkWithParent(String parentPid, Node node) {
+	private void linkWithParent(String parentPid, Node node, boolean doIndex) {
 		try {
 			Node parent = new Read().readNode(parentPid);
 			unlinkOldParent(node);
 			linkToNewParent(parent, node);
 			inheritTitle(parent, node);
 			inheritRights(parent, node);
-			updateIndex(parentPid);
+			if (doIndex == true)
+				updateIndex(parentPid);
 		} catch (Exception e) {
 			play.Logger.warn("Fail link " + node.getPid() + " to " + parentPid + "",
 					e);
@@ -344,14 +349,15 @@ public class Create extends RegalAction {
 			Node webpageVersion = null;
 			if ((versionPid != null) && (!versionPid.isEmpty())) {
 				webpageVersion =
-						createResource(versionPid, n.getNamespace(), regalObject);
+						createResource(versionPid, n.getNamespace(), regalObject, false);
 			} else {
-				webpageVersion = createResource(n.getNamespace(), regalObject);
+				webpageVersion = createResource(n.getNamespace(), regalObject, false);
 			}
 
-			new Modify().updateLobidifyAndEnrichMetadata(webpageVersion,
+			new Modify().updateLobidify2AndEnrichMetadata(webpageVersion,
 					"<" + webpageVersion.getPid()
-							+ "> <http://purl.org/dc/terms/title> \"" + label + "\" .");
+							+ "> <http://purl.org/dc/terms/title> \"" + label + "\" .",
+					false);
 			if (localpath != null) {
 				webpageVersion.setLocalData(localpath);
 			}
@@ -359,7 +365,8 @@ public class Create extends RegalAction {
 			webpageVersion.setFileLabel(label);
 			webpageVersion.setAccessScheme(n.getAccessScheme());
 			webpageVersion.setPublishScheme(n.getPublishScheme());
-			webpageVersion = updateResource(webpageVersion);
+			webpageVersion = updateResource(webpageVersion, false);
+			updateIndex(n.getPid()); // re-index parent pid
 
 			conf.setLocalDir(outDir.getAbsolutePath());
 			WebgatherLogger.info("localDir=" + outDir.getAbsolutePath());
@@ -576,7 +583,7 @@ public class Create extends RegalAction {
 			regalObject.setIsDescribedBy(prov);
 			regalObject.setParentPid(n.getPid());
 			Node webpageVersion =
-					createResource(versionPid, n.getNamespace(), regalObject);
+					createResource(versionPid, n.getNamespace(), regalObject, false);
 			new Modify().updateLobidifyAndEnrichMetadata(webpageVersion,
 					"<" + webpageVersion.getPid()
 							+ "> <http://purl.org/dc/terms/title> \"" + label + "\" .");
@@ -586,7 +593,7 @@ public class Create extends RegalAction {
 			webpageVersion.setFileLabel(label);
 			webpageVersion.setAccessScheme(n.getAccessScheme());
 			webpageVersion.setPublishScheme(n.getPublishScheme());
-			webpageVersion = updateResource(webpageVersion);
+			webpageVersion = updateResource(webpageVersion, true);
 			String msg = new Modify().updateConf(webpageVersion, conf.toString());
 			ApplicationLogger.info(msg);
 
@@ -656,11 +663,11 @@ public class Create extends RegalAction {
 			toScienceObject.setParentPid(resource.getParentNode().getPid());
 			Node researchDataResource = null;
 			if ((resourcePid != null) && (!resourcePid.isEmpty())) {
-				researchDataResource =
-						createResource(resourcePid, n.getNamespace(), toScienceObject);
+				researchDataResource = createResource(resourcePid, n.getNamespace(),
+						toScienceObject, true);
 			} else {
 				researchDataResource =
-						createResource(n.getNamespace(), toScienceObject);
+						createResource(n.getNamespace(), toScienceObject, true);
 			}
 
 			new Modify().updateLobidifyAndEnrichMetadata(researchDataResource,
@@ -687,7 +694,7 @@ public class Create extends RegalAction {
 			BigInteger sizeInByte = new BigInteger("100000");
 			researchDataResource.setFileSize(sizeInByte);
 			ApplicationLogger.info("localData = " + resource.getUrlString());
-			researchDataResource = updateResource(researchDataResource);
+			researchDataResource = updateResource(researchDataResource, true);
 
 			ApplicationLogger
 					.info("Successfully created resource " + researchDataResource.getPid()

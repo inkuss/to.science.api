@@ -51,7 +51,7 @@ public class Enrich {
 	private static final String PREF_LABEL =
 			"http://www.w3.org/2004/02/skos/core#prefLabel";
 
-	public static String enrichMetadata2(Node node) {
+	public static String enrichMetadata2(Node node, boolean doIndex) {
 		try {
 			play.Logger.info("Enrich 2 " + node.getPid());
 			String metadata = node.getMetadata2();
@@ -62,7 +62,7 @@ public class Enrich {
 			List<Statement> enrichStatements = new ArrayList<>();
 			enrichAll(node, metadata, enrichStatements);
 			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
-			new Modify().updateMetadata2(node, metadata);
+			new Modify().updateMetadata2(node, metadata, doIndex);
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 			return "Enrichment of " + node.getPid() + " partially failed !\n"

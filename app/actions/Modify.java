@@ -180,7 +180,7 @@ public class Modify extends RegalAction {
 	public String updateLobidify2AndEnrichMetadata(String pid, String content) {
 		try {
 			Node node = new Read().readNode(pid);
-			return updateLobidify2AndEnrichMetadata(node, content);
+			return updateLobidify2AndEnrichMetadata(node, content, true);
 		} catch (Exception e) {
 			throw new UpdateNodeException(e);
 		}
@@ -208,14 +208,14 @@ public class Modify extends RegalAction {
 			String alephid =
 					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
 			content = getLobid2DataAsNtripleString(node, alephid);
-			updateMetadata2(node, content);
+			updateMetadata2(node, content, true);
 
-			String enrichMessage2 = Enrich.enrichMetadata2(node);
+			String enrichMessage2 = Enrich.enrichMetadata2(node, true);
 			return pid + " metadata successfully updated, lobidified and enriched! "
 					+ enrichMessage2;
 		} else {
-			updateMetadata2(node, content);
-			String enrichMessage2 = Enrich.enrichMetadata2(node);
+			updateMetadata2(node, content, true);
+			String enrichMessage2 = Enrich.enrichMetadata2(node, true);
 			return pid + " metadata successfully updated, and enriched! "
 					+ enrichMessage2;
 		}
@@ -224,9 +224,11 @@ public class Modify extends RegalAction {
 	/**
 	 * @param node The node that must be updated
 	 * @param content The metadata as rdf string
+	 * @param doIndex ob das Objekt hier neu indexiert werden soll
 	 * @return a short message
 	 */
-	public String updateLobidify2AndEnrichMetadata(Node node, String content) {
+	public String updateLobidify2AndEnrichMetadata(Node node, String content,
+			boolean doIndex) {
 
 		String pid = node.getPid();
 		if (content == null) {
@@ -244,14 +246,14 @@ public class Modify extends RegalAction {
 					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
 			alephid = alephid.replaceAll("#.*", "");
 			content = getLobid2DataAsNtripleString(node, alephid);
-			updateMetadata2(node, content);
+			updateMetadata2(node, content, doIndex);
 
-			String enrichMessage = Enrich.enrichMetadata2(node);
+			String enrichMessage = Enrich.enrichMetadata2(node, doIndex);
 			return pid + " metadata successfully updated, lobidified and enriched! "
 					+ enrichMessage;
 		} else {
-			updateMetadata2(node, content);
-			String enrichMessage = Enrich.enrichMetadata2(node);
+			updateMetadata2(node, content, doIndex);
+			String enrichMessage = Enrich.enrichMetadata2(node, doIndex);
 			return pid + " metadata successfully updated, and enriched! "
 					+ enrichMessage;
 		}
@@ -289,8 +291,8 @@ public class Modify extends RegalAction {
 			try {
 				content = getLobid2DataAsNtripleStringIfResourceHasRecentlyChanged(node,
 						alephid, date);
-				updateMetadata2(node, content);
-				msg.append(Enrich.enrichMetadata2(node));
+				updateMetadata2(node, content, true);
+				msg.append(Enrich.enrichMetadata2(node, true));
 			} catch (NotUpdatedException e) {
 				play.Logger.debug("", e);
 				play.Logger.info(pid + " Not updated. " + e.getMessage());
@@ -328,8 +330,8 @@ public class Modify extends RegalAction {
 				}
 			}
 			node.setMetadata1(content);
-			OaiDispatcher.makeOAISet(node);
-			reindexNodeAndParent(node);
+			OaiDispatcher.makeOAISet(node, true);
+			reindexNodeAndParent(node, true);
 			return pid + " metadata successfully updated!";
 		} catch (RdfException e) {
 			throw new HttpArchiveException(400, e);
@@ -548,7 +550,9 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	private void reindexNodeAndParent(Node node) {
+	private void reindexNodeAndParent(Node node, boolean doIndex) {
+		if (!doIndex)
+			return;
 		node = updateIndex(node.getPid());
 		String parentPid = node.getParentPid();
 		if (parentPid != null && !parentPid.isEmpty()) {
@@ -598,7 +602,7 @@ public class Modify extends RegalAction {
 					subject + " already has a urn. Leave unmodified!");
 		String urn = generateUrn(subject, snid);
 		node.setUrn(urn);
-		return OaiDispatcher.makeOAISet(node);
+		return OaiDispatcher.makeOAISet(node, true);
 	}
 
 	/**
@@ -613,7 +617,7 @@ public class Modify extends RegalAction {
 		String urn = generateUrn(node.getPid(), snid);
 		node.setLastModifiedBy(userId);
 		node.setUrn(urn);
-		return OaiDispatcher.makeOAISet(node);
+		return OaiDispatcher.makeOAISet(node, true);
 	}
 
 	/**
@@ -684,7 +688,7 @@ public class Modify extends RegalAction {
 	 * @return a short message
 	 */
 	public String lobidify2(Node node) {
-		return updateLobidify2AndEnrichMetadata(node, node.getMetadata2());
+		return updateLobidify2AndEnrichMetadata(node, node.getMetadata2(), true);
 	}
 
 	public String lobidify2(Node node, LocalDate date) {
@@ -699,7 +703,7 @@ public class Modify extends RegalAction {
 	 * @return a message
 	 */
 	public String reinitOaiSets(List<Node> nodes) {
-		return apply(nodes, n -> OaiDispatcher.makeOAISet(n));
+		return apply(nodes, n -> OaiDispatcher.makeOAISet(n, true));
 	}
 
 	/**
@@ -894,7 +898,7 @@ public class Modify extends RegalAction {
 			String registerMetadataResponse =
 					client.registerMetadataAtDatacite(node, xml);
 			String mintDoiResponse = client.mintDoiAtDatacite(doi, objectUrl);
-			String makeOaiSetResponse = OaiDispatcher.makeOAISet(node);
+			String makeOaiSetResponse = OaiDispatcher.makeOAISet(node, true);
 			result.put("Metadata", xml);
 			result.put("registerMetadataResponse", registerMetadataResponse);
 			result.put("mintDoiResponse", mintDoiResponse);
@@ -984,10 +988,9 @@ public class Modify extends RegalAction {
 		String metadata = node.getMetadata2();
 		metadata = RdfUtils.addTriple(node.getPid(), pred, obj, true, metadata,
 				RDFFormat.NTRIPLES);
-		updateLobidify2AndEnrichMetadata(node, metadata);
+		updateLobidify2AndEnrichMetadata(node, metadata, false);
 		node = new Read().readNode(node.getPid());
-		node.setNamespace("zabel");
-		OaiDispatcher.makeOAISet(node);
+		OaiDispatcher.makeOAISet(node, false);
 		return "Update " + node.getPid() + "! " + pred + " has been added.";
 
 	}
@@ -1028,12 +1031,12 @@ public class Modify extends RegalAction {
 	}
 
 	public String lobidify2(Node node, String alephid) {
-		updateMetadata2(node, getLobid2DataAsNtripleString(node, alephid));
-		String enrichMessage = Enrich.enrichMetadata2(node);
+		updateMetadata2(node, getLobid2DataAsNtripleString(node, alephid), true);
+		String enrichMessage = Enrich.enrichMetadata2(node, true);
 		return enrichMessage;
 	}
 
-	String updateMetadata2(Node node, String content) {
+	String updateMetadata2(Node node, String content, boolean doIndex) {
 		try {
 			String pid = node.getPid();
 			if (content == null) {
@@ -1049,8 +1052,8 @@ public class Modify extends RegalAction {
 			File file = CopyUtils.copyStringToFile(content);
 			node.setMetadata2File(file.getAbsolutePath());
 			node.setMetadata2(content);
-			OaiDispatcher.makeOAISet(node);
-			reindexNodeAndParent(node);
+			OaiDispatcher.makeOAISet(node, doIndex);
+			reindexNodeAndParent(node, doIndex);
 			return pid + " metadata2 successfully updated!";
 		} catch (RdfException e) {
 			throw new HttpArchiveException(400, e);
