@@ -194,7 +194,7 @@ public class Search {
 					+ type + ", id:" + id);
 			ActionResponse response =
 					client.prepareDelete(index, type, id).execute().actionGet();
-			int error = 1 / 0;
+			// int error = 1 / 0; # Fehler provozieren
 			refresh();
 			play.Logger.info("Search.index: Deleted from index successfully!");
 			return response;
