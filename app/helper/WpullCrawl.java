@@ -388,14 +388,6 @@ public class WpullCrawl {
 	 * @param node der Knoten einer Webpage
 	 * @return Crawler Exit Status des letzten wpull-Crawls
 	 */
-<<<<<<< Updated upstream
-	public static int getCrawlExitStatus(Node node) {
-		File logfile = findLatestLogFile(node);
-		if (logfile == null || !logfile.exists()) {
-			WebgatherLogger.warn(
-					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
-			return -2;
-=======
 	public static void findeUmzugsnotiz(Node node, Gatherconf conf) {
 		WebgatherLogger.debug("Suche Umzugsmeldung für " + conf.getName());
 		File latestCrawlDir = Webgatherer.getLatestCrawlDir(
@@ -508,7 +500,6 @@ public class WpullCrawl {
 			} catch (IOException e) {
 				WebgatherLogger.warn("Read Buffer cannot be closed!");
 			}
->>>>>>> Stashed changes
 		}
 		CrawlLog crawlLog = new CrawlLog(logfile);
 		crawlLog.parse();
