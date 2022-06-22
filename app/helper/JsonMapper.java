@@ -942,7 +942,7 @@ public class JsonMapper {
 
 		try {
 			String jsonString = JsonUtil.mapper().writeValueAsString(ld2Rdf);
-			play.Logger.debug("asRdf: jsonString=" + jsonString);
+			// /play.Logger.debug("asRdf: jsonString=" + jsonString);
 		} catch (Exception e) {
 			play.Logger.error("Fehler beim Logging von jsonString", e);
 		}
@@ -1044,7 +1044,6 @@ public class JsonMapper {
 		}
 		ld2Rdf.put("@context", Globals.protocol + Globals.server + "/context.json");
 		postprocessing(ld2Rdf);
-		play.Logger.debug("Exiting JsonMapper.getLd2()");
 		return ld2Rdf;
 	}
 
