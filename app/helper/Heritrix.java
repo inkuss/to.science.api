@@ -18,6 +18,10 @@ package helper;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -28,13 +32,17 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.regex.*;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 
+import actions.Modify;
 import models.Gatherconf;
+import models.Node;
 import play.Logger;
 import play.Play;
 
@@ -440,4 +448,124 @@ public class Heritrix {
 		}
 	}
 
+	/**
+	 * Sucht nach einer Umzugsmeldung im letzten Crawl-Log. Falls eine gefunden
+	 * und noch nicht bekannt, schreibe Umzugsnotizen in der Gatherconf der
+	 * Webpage.
+	 * 
+	 * @param node der Knoten der Webpage
+	 * @param conf die Gatherconf der Webpage
+	 */
+	public static void findeUmzugsnotiz(Node node, Gatherconf conf) {
+		WebgatherLogger.debug("Suche Umzugsmeldung für " + conf.getName());
+		File latestCrawlDir = Webgatherer.getLatestCrawlDir(Play.application()
+				.configuration().getString("regal-api.heritrix.jobDir"), node.getPid());
+		if (latestCrawlDir == null) { // nichts zu tun
+			return;
+		}
+		File crawlLog = new File(latestCrawlDir.toString() + "/crawl.log");
+		if (!crawlLog.exists()) { // nichts zu tun
+			return;
+		}
+
+		/* das Log wird geparst */
+		WebgatherLogger.debug("Parse das Log " + crawlLog.toString());
+		// Suche nach so etwas im Heritrix Crawl Log:
+		// <Zeitstempel> 301 <Nummer> http://www.mbwjk.rlp.de/
+		// <Zeitstempel> 1 <Nummer> dns:www.mbwwk.rlp.de
+		/*
+		 * URL in 301-Zeile muss gleich sein wie in Crawler Settings, evtl. bis auf
+		 * Schema und abschließenden Schrägstrich. Pfade müssen übereinstimmen !
+		 * Authority muss nach Punycode umgewandelt werden.
+		 */
+
+		BufferedReader buf = null;
+		String regExp1 = "^[^ \t]+ ‘(.*)’: 301 Moved Permanently.";
+		Pattern pattern1 = Pattern.compile(regExp1);
+		String regExp2 = "^INFO Fetching ‘(.*)’.";
+		Pattern pattern2 = Pattern.compile(regExp2);
+		int httpResponseCode = 0;
+		String lineUrl = "";
+		try {
+			// Konvertiert Heritrix nach Punycode ? Falls ja, auslagern
+			// convertURL-Routinen nach Webgatherer
+			// String urlPunycode = convertUnicodeURLToAscii(conf.getUrl(), false);
+			String urlPunycode = conf.getUrl();
+			urlPunycode = urlPunycode.replaceAll("/$", "");
+			WebgatherLogger.debug("Suche im Log nach urlPunycode = " + urlPunycode);
+			/*
+			 * jetzt auf "^INFO Fetched ..." matchen, Schema und abschließenden
+			 * Schrägstrich entfernen
+			 */
+			String urlMoved = null;
+			buf = new BufferedReader(new FileReader(crawlLog));
+			Matcher matcher1 = null;
+			Matcher matcher2 = null;
+			String line = null;
+			int lineno = 0;
+			boolean found301 = false;
+			while ((line = buf.readLine()) != null) {
+				lineno++;
+				httpResponseCode = 0;
+				String[] lineParts = line.split(" ");
+				if (lineParts.length > 1) {
+					httpResponseCode = Integer.parseInt(lineParts[1]);
+				}
+				if (httpResponseCode == 301) {
+					if (lineParts.length > 3) {
+						lineUrl = lineParts[3];
+						WebgatherLogger.debug("HTTP Response Code 301 gefunden in Zeile "
+								+ lineno + "; URL= " + lineUrl);
+					}
+				}
+
+				/*
+				 * if (found301) { // jetzt kommt die Zeile nach einer Umzugsmeldung; in
+				 * dieser steht die // neue URL. Diese Zeile auswerten. matcher2 =
+				 * pattern2.matcher(line); if (!matcher2.find()) { WebgatherLogger.warn(
+				 * "Meldung \"301 Moved Permanently\" im Log gefunden, aber keine neue URL! Umzugsnotiz kann nicht generiert werden."
+				 * => Doch, URL unbekannt verzogen. ); break; } String newURL =
+				 * matcher2.group(1); WebgatherLogger.debug( "Neue URL " + newURL +
+				 * "gefunden."); // Gucke, ob die neue URL schon in die Gatherconf der
+				 * Webpage // übernommen wurde if (conf.getUrl().equals(newURL)) {
+				 * WebgatherLogger .debug(
+				 * "Neue URL wurde schon in die Gatherconf übernommen"); break; } //
+				 * nichts zu tun conf.setUrlHist(conf.getUrl()); conf.setUrl(newURL);
+				 * conf.setUrlChangeDate(new Date()); String msg = new
+				 * Modify().updateConf(node, conf.toString());
+				 * WebgatherLogger.info(msg); WebgatherLogger.info(
+				 * "Neue URL wurde in die Gatherconf übernommen! Alte URL und Änderungsdatum wurden ebenso gespeichert."
+				 * ); break; }
+				 */
+				/*
+				 * matcher1 = pattern1.matcher(line); if (matcher1.find()) { urlMoved =
+				 * matcher1.group(1); WebgatherLogger.debug("\"INFO Fetched ‘" +
+				 * urlMoved + "’: 301 Moved Permanently.\" gefunden in Zeile " +
+				 * lineno); urlMoved = urlMoved.replaceAll("/$", ""); urlMoved =
+				 * validateURL(urlMoved, false, false); // Schema entfernen // Jetzt
+				 * muss Gleichheit herrschen, um sagen zu können, dass diese // Site
+				 * umgezogen ist: if (urlMoved.equals(urlPunycode)) {
+				 * WebgatherLogger.debug("De Sick is umjetrocke!"); found301 = true; } }
+				 */
+			} // näcshste Zeile
+		} catch (IOException e) {
+			WebgatherLogger.warn("Fehler bei Suche nach Umzugsmeldung in crawlLog "
+					+ crawlLog.getAbsolutePath() + "!", e.toString());
+		}
+		/*
+		 * catch (URISyntaxException e) { WebgatherLogger .warn(
+		 * "Syntax-Fehler in URL ! Fehler bei Suche nach Umzugsmeldung."); throw new
+		 * RuntimeException(e); }
+		 */
+		finally {
+			try {
+				if (buf != null) {
+					buf.close();
+				}
+			} catch (IOException e) {
+				WebgatherLogger.warn("Read Buffer cannot be closed!");
+			}
+		}
+		return;
+	}
 }

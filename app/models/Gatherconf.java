@@ -107,6 +107,8 @@ public class Gatherconf {
 	AgentIdSelection agentIdSelection;
 	ArrayList<String> urlsExcluded;
 	Date startDate;
+	Date urlChangeDate; // the date the URL changed from urlHist to url
+	boolean urlUnbekanntVerzogen; // Umzugsmeldung entdeckt, aber keine neue URL
 	String localDir;
 	String openWaybackLink;
 	String id;
@@ -319,6 +321,20 @@ public class Gatherconf {
 	 */
 	public void setInvalidUrl(boolean invalidUrl) {
 		this.invalidUrl = invalidUrl;
+	}
+
+	/**
+	 * @return ob die URL unbekannt verzogen ist
+	 */
+	public boolean getUrlUnbekanntVerzogen() {
+		return urlUnbekanntVerzogen;
+	}
+
+	/**
+	 * @param urlUnbekanntVerzogen ob die URL unbekannt verzogen ist
+	 */
+	public void setUrlUnbekanntVerzogen(boolean urlUnbekanntVerzogen) {
+		this.urlUnbekanntVerzogen = urlUnbekanntVerzogen;
 	}
 
 	/**

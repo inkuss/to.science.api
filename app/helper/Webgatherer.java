@@ -103,6 +103,10 @@ public class Webgatherer implements Runnable {
 					continue;
 				}
 				WebgatherLogger.info("Test if " + n.getPid() + " is scheduled.");
+				/*
+				 * ToDo: Suche im letzten Crawl-Log nach Umzugsnotiz (HTTP Response 301)
+				 */
+				findeUmzugsnotiz(n, conf);
 				// find open jobs
 				if (isOutstanding(n, conf)) {
 					WebgatherLogger.info(
@@ -257,6 +261,26 @@ public class Webgatherer implements Runnable {
 		} catch (Exception e) {
 			WebgatherLogger.error("Kann letztes Crawl-Datum nicht bestimmen.", e);
 			return false;
+		}
+	}
+
+	/**
+	 * sucht im letzten Crawl-Log nach einer Umzugsmeldung (HTTP Responce 301 -
+	 * Moved Permamently). Schreibt Ergebnis in die Gatherconf der Webpage.
+	 * 
+	 * @param n der Knoten der Webpage
+	 * @param conf die Gatherconf der Webpage
+	 */
+	private static void findeUmzugsnotiz(Node n, Gatherconf conf) {
+		if (conf.getCrawlerSelection()
+				.equals(Gatherconf.CrawlerSelection.heritrix)) {
+			Heritrix.findeUmzugsnotiz(n, conf);
+		} else if (conf.getCrawlerSelection()
+				.equals(Gatherconf.CrawlerSelection.wpull)) {
+			WpullCrawl.findeUmzugsnotiz(n, conf);
+		} else {
+			WebgatherLogger.warn(
+					"Unbekannte Crawler-Auswahl: " + conf.getCrawlerSelection() + " !");
 		}
 	}
 

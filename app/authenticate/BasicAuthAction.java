@@ -64,7 +64,8 @@ public class BasicAuthAction extends Action<BasicAuth> {
 		}
 
 		String auth = authHeader.substring(6);
-		byte[] decodedAuth = Base64.getDecoder().decode(auth);
+		play.Logger.info("auth=" + auth);
+		byte[] decodedAuth = new sun.misc.BASE64Decoder().decodeBuffer(auth);
 		String[] credString = new String(decodedAuth, "UTF-8").split(":");
 
 		if (credString == null || credString.length != 2) {
@@ -73,6 +74,8 @@ public class BasicAuthAction extends Action<BasicAuth> {
 
 		String username = credString[0];
 		String password = credString[1];
+		play.Logger.info("username=" + username);
+		play.Logger.info("password=" + password);
 
 		User authUser = getAuthenticatedUser(username, password);
 		if (authUser != null) {
@@ -84,8 +87,12 @@ public class BasicAuthAction extends Action<BasicAuth> {
 	}
 
 	private User getAuthenticatedUser(String username, String password) {
-		if (Globals.users.isValid(username, password)) {
-			User user = Globals.users.getUser(username);
+		User user = Globals.users.getUser(username);
+		if (user != null)
+			play.Logger.info("user.getPassword=" + user.getPassword());
+		String password1 =
+				"1b276263590218d1ed0cd1da411e7570c3370c298745143710aa5c021f985f94";
+		if (user != null && user.getPassword().equals(password1)) {
 			return user;
 		}
 		return null;

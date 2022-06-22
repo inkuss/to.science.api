@@ -388,12 +388,127 @@ public class WpullCrawl {
 	 * @param node der Knoten einer Webpage
 	 * @return Crawler Exit Status des letzten wpull-Crawls
 	 */
+<<<<<<< Updated upstream
 	public static int getCrawlExitStatus(Node node) {
 		File logfile = findLatestLogFile(node);
 		if (logfile == null || !logfile.exists()) {
 			WebgatherLogger.warn(
 					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
 			return -2;
+=======
+	public static void findeUmzugsnotiz(Node node, Gatherconf conf) {
+		WebgatherLogger.debug("Suche Umzugsmeldung für " + conf.getName());
+		File latestCrawlDir = Webgatherer.getLatestCrawlDir(
+				Play.application().configuration().getString("regal-api.wpull.jobDir"),
+				node.getPid());
+		if (latestCrawlDir == null) { // nichts zu tun
+			return;
+		}
+		File crawlLog = new File(latestCrawlDir.toString() + "/crawl.log");
+		if (!crawlLog.exists()) { // nichts zu tun
+			return;
+		}
+
+		/* das Log wird geparst */
+		WebgatherLogger.debug("Parse das Log " + crawlLog.toString());
+		// Suche nach so etwas im wpull Crawl Log:
+		// INFO Fetched ‘http://www.xn--gttingen-n4a.de/’: 301 Moved Permanently.
+		// INFO Fetching ‘https://www.goettingen.de/’.
+		/*
+		 * URL in "INFO Fetched" muss gleich sein wie in Crawler Settings, evtl. bis
+		 * auf Schema und abschließenden Schrägstrich. Pfade müssen übereinstimmen !
+		 * Authority muss nach Punycode umgewandelt werden.
+		 */
+
+		BufferedReader buf = null;
+		String regExp1 = "^INFO Fetched ‘(.*)’: 301 Moved Permanently.";
+		Pattern pattern1 = Pattern.compile(regExp1);
+		String regExp2 = "^INFO Fetching ‘(.*)’.";
+		Pattern pattern2 = Pattern.compile(regExp2);
+		try {
+			String urlPunycode =
+					WebgatherUtils.convertUnicodeURLToAscii(conf.getUrl(), false);
+			urlPunycode = urlPunycode.replaceAll("/$", "");
+			WebgatherLogger.debug("Suche im Log nach urlPunycode = " + urlPunycode);
+			/*
+			 * jetzt auf "^INFO Fetched ..." matchen, Schema und abschließenden
+			 * Schrägstrich entfernen
+			 */
+			String urlMoved = null;
+			buf = new BufferedReader(new FileReader(crawlLog));
+			Matcher matcher1 = null;
+			Matcher matcher2 = null;
+			String line = null;
+			int lineno = 0;
+			boolean found301 = false;
+			while ((line = buf.readLine()) != null) {
+				lineno++;
+				if (found301) {
+					// jetzt kommt die Zeile nach einer Umzugsmeldung; in dieser steht die
+					// neue URL. Diese Zeile auswerten.
+					matcher2 = pattern2.matcher(line);
+					if (!matcher2.find()) {
+						WebgatherLogger.info(
+								"Meldung \"301 Moved Permanently\" im Log gefunden, aber keine neue URL! => URL ist unbekannt verzogen.");
+						if (conf.getUrlUnbekanntVerzogen()) {
+							break;
+						} // nichts zu tun
+						conf.setUrlUnbekanntVerzogen(true);
+						conf.setUrlChangeDate(new Date());
+						String msg = new Modify().updateConf(node, conf.toString());
+						WebgatherLogger.info(msg);
+						break;
+					}
+					String newURL = matcher2.group(1);
+					WebgatherLogger.debug("Neue URL " + newURL + "gefunden.");
+					// Gucke, ob die neue URL schon in die Gatherconf der Webpage
+					// übernommen wurde
+					if (conf.getUrl().equals(newURL)) {
+						WebgatherLogger
+								.debug("Neue URL wurde schon in die Gatherconf übernommen");
+						break;
+					} // nichts zu tun
+					conf.setUrlHist(conf.getUrl());
+					conf.setUrl(newURL);
+					conf.setUrlChangeDate(new Date());
+					String msg = new Modify().updateConf(node, conf.toString());
+					WebgatherLogger.info(msg);
+					WebgatherLogger.info(
+							"Neue URL wurde in die Gatherconf übernommen! Alte URL und Änderungsdatum wurden ebenso gespeichert.");
+					break;
+				}
+				matcher1 = pattern1.matcher(line);
+				if (matcher1.find()) {
+					urlMoved = matcher1.group(1);
+					WebgatherLogger.debug("\"INFO Fetched ‘" + urlMoved
+							+ "’: 301 Moved Permanently.\" gefunden in Zeile " + lineno);
+					urlMoved = urlMoved.replaceAll("/$", "");
+					urlMoved = WebgatherUtils.validateURL(urlMoved, false, false); // Schema
+																																					// entfernen
+					// Jetzt muss Gleichheit herrschen, um sagen zu können, dass diese
+					// Site umgezogen ist:
+					if (urlMoved.equals(urlPunycode)) {
+						WebgatherLogger.debug("De Sick is umjetrocke!");
+						found301 = true;
+					}
+				}
+			}
+		} catch (IOException e) {
+			WebgatherLogger.warn("Fehler bei Suche nach Umzugsmeldung in crawlLog "
+					+ crawlLog.getAbsolutePath() + "!", e.toString());
+		} catch (URISyntaxException e) {
+			WebgatherLogger
+					.warn("Syntax-Fehler in URL ! Fehler bei Suche nach Umzugsmeldung.");
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				if (buf != null) {
+					buf.close();
+				}
+			} catch (IOException e) {
+				WebgatherLogger.warn("Read Buffer cannot be closed!");
+			}
+>>>>>>> Stashed changes
 		}
 		CrawlLog crawlLog = new CrawlLog(logfile);
 		crawlLog.parse();
