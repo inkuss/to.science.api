@@ -1224,7 +1224,7 @@ public class Modify extends RegalAction {
 			OaiDispatcher.makeOAISet(node);
 			play.Logger.debug("Re-Indexing node and parent");
 			reindexNodeAndParent(node);
-			msg = "LRMI data successfully updated!";
+			msg = "KTBL data successfully updated!";
 			play.Logger.debug(msg);
 			return pid + " " + msg;
 		} catch (IOException e) {

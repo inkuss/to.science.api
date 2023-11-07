@@ -203,7 +203,7 @@ public class KtblMapper {
 
 			// LRMIDaten nach JSONObject wandeln
 			JSONObject jcontent = new JSONObject(content);
-			play.Logger.debug("Start mapping of lrmi to lobid2");
+			play.Logger.debug("Start mapping of KTBL to lobid2");
 			JSONArray arr = null;
 			JSONObject obj = null;
 			Object myObj = null; /* Objekt von zunächst unbekanntem Typ/Klasse */
@@ -253,12 +253,16 @@ public class KtblMapper {
 			rdf.put(accessScheme, "public");
 			rdf.put(publishScheme, "public");
 
-			arr = jcontent.getJSONArray("type");
-			rdf.put("contentType", arr.getString(0));
+			if (jcontent.has("type")) {
+				arr = jcontent.getJSONArray("type");
+				rdf.put("contentType", arr.getString(0));
+			}
 
-			List<String> names = new ArrayList<>();
-			names.add(jcontent.getString(name));
-			rdf.put("title", names);
+			if (jcontent.has(name)) {
+				List<String> names = new ArrayList<>();
+				names.add(jcontent.getString(name));
+				rdf.put("title", names);
+			}
 
 			if (jcontent.has("inLanguage")) {
 				List<Map<String, Object>> inLangList = new ArrayList<>();
@@ -319,7 +323,7 @@ public class KtblMapper {
 						creatorMap.put("@id", obj.getString("id"));
 					} else {
 						/*
-						 * Dieser Fall sollte nicht vorkommen, da die LRMI-Daten vorher
+						 * Dieser Fall sollte nicht vorkommen, da die KTBL-Daten vorher
 						 * angreichert (enriched) werden, bevor sie auf die Metadata2-Felder
 						 * abgebildet werden. Das passiert in Enrich.enrichLrmiData(). Falls
 						 * man doch hier hin kommt, gibt es eine Warnung:
@@ -446,11 +450,11 @@ public class KtblMapper {
 			JsonMapper jsonMapper = new JsonMapper();
 			jsonMapper.postprocessing(rdf);
 
-			play.Logger.debug("Done mapping LRMI data to lobid2.");
+			play.Logger.debug("Done mapping KTBL data to lobid2.");
 			return rdf;
 		} catch (Exception e) {
 			play.Logger.error("Content could not be mapped!", e);
-			throw new RuntimeException("LRMI.json could not be mapped to lobid2.json",
+			throw new RuntimeException("KTBL.json could not be mapped to lobid2.json",
 					e);
 		}
 
@@ -526,7 +530,7 @@ public class KtblMapper {
 			}
 
 			// geändertes JSONObject als Zeichenkette zurück geben
-			play.Logger.debug("Modified LRMI Data to: " + jcontent.toString());
+			play.Logger.debug("Modified KTBL Data to: " + jcontent.toString());
 			return jcontent.toString();
 
 		} catch (JSONException je) {
