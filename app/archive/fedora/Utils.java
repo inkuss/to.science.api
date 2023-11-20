@@ -536,6 +536,23 @@ public class Utils {
 		}
 	}
 
+	void updateKtblDataStream(Node node) {
+		try {
+			File file = new File(node.getKtblDataFile());
+			if (dataStreamExists(node.getPid(), "ktbl")) {
+				new ModifyDatastream(node.getPid(), "ktbl").versionable(true)
+						.dsLabel("KTBL JSON").dsState("A").controlGroup("M")
+						.mimeType("application/json").content(file).execute();
+			} else {
+				new AddDatastream(node.getPid(), "ktbl").versionable(true).dsState("A")
+						.dsLabel("KTBL JSON").controlGroup("M").mimeType("application/json")
+						.content(file).execute();
+			}
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
 	void readRelsExt(Node node) throws FedoraClientException {
 		FedoraResponse response =
 				new GetDatastreamDissemination(node.getPid(), "RELS-EXT").download(true)
