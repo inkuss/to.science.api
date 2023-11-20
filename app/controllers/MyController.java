@@ -521,9 +521,12 @@ public class MyController extends Controller {
 					play.Logger.debug(
 							"Try to access with role: " + role + " and userId " + userId);
 					if (!modifyingAccessIsAllowed(role)) {
+						play.Logger.debug("Schreibender Zugriff nicht erlaubt");
 						return AccessDenied();
 					} else {
+						play.Logger.debug("Controller Action Exec");
 						Result result = ca.exec(userId);
+						play.Logger.debug("Controller Action Result:" + result.toString());
 						if (userId != null && !userId.equals("0") && !userId.equals("1")
 								&& !userId.equals("UrnAllocator")) {
 							play.Logger.info(json(modify
