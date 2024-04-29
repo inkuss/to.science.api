@@ -67,11 +67,23 @@ public class Gatherconf {
 		KB, MB, GB;
 	}
 
+	/**
+	 * Enumeration für Browswer-IDs (user agents) The browser ID needs to be
+	 * selectable in to.science.drupal/edoweb/php/crawlerForm.php I.e. if you add
+	 * or change a browser id, also change that php file.
+	 * 
+	 * @author Ingolf Kuss, hbz-nrw.de
+	 */
 	@SuppressWarnings("javadoc")
 	public enum AgentIdSelection {
-		Undefined, Chrome, Edge, IE, Firefox, Safari, Googlebot;
+		Undefined, Chrome, Edge, IE, Firefox, Safari, Googlebot, toscience;
 	}
 
+	/**
+	 * HashTable für Browser-IDs (user agents)
+	 * 
+	 * @author Ingolf Kuss, hbz-nrw.de
+	 */
 	@SuppressWarnings("javadoc")
 	public static Hashtable<AgentIdSelection, String> agentTable =
 			new Hashtable<AgentIdSelection, String>() {
@@ -89,6 +101,8 @@ public class Gatherconf {
 							"\"Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_13_3)%20AppleWebKit/604.5.6%20(KHTML,%20like%20Gecko)%20Version/11.0.3%20Safari/604.5.6\"");
 					put(AgentIdSelection.Googlebot,
 							"\"Mozilla/5.0%20(compatible;%20Googlebot/2.1;%20+http://www.google.com/bot.html)\"");
+					put(AgentIdSelection.toscience,
+							"\"to.science%20(https://github.com/hbz/to.science.api;mailto:toscience@hbz-nrw.de)\"");
 				}
 			};
 
