@@ -27,6 +27,7 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.json.JSONObject;
 import org.w3c.dom.Element;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -86,6 +87,40 @@ public class Enrich {
 			enrichAll(node, metadata, enrichStatements);
 			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
 			new Modify().updateMetadata(metadata2, node, metadata);
+		} catch (Exception e) {
+			play.Logger.debug("", e);
+			return "Enrichment of " + node.getPid() + " partially failed !\n"
+					+ e.getMessage();
+		}
+		return "Enrichment of " + node.getPid() + " succeeded!";
+	}
+
+	public static String enrichToscienceMetadata(Node node) {
+		try {
+			play.Logger.info("Enrich Toscience Metadata " + node.getPid());
+			String metadata = node.getMetadata(toscience);
+			play.Logger.debug("Toscience Metadata=" + metadata);
+			if (metadata == null || metadata.isEmpty()) {
+				play.Logger.info("No Toscience Metadata to enrich " + node.getPid());
+				return "No Toscience Metadata to enrich " + node.getPid();
+			}
+			/**
+			 * Vorgehensweise: Traversiere alle JSON-Elemente von "metadata". Falls
+			 * key = "@id", löse den Label auf. Ersetze den Wert des JSON-Elementes
+			 * "prefLabel" auf der gleichen Ebene mit dem Label.
+			 * 
+			 * Den prefLabel zu einer URI (@id) ermittele ich so: String prefLabel =
+			 * MyEtikettMaker.getLabelFromEtikettWs(uri);
+			 * 
+			 * 
+			 */
+			JSONObject toscienceJson = new JSONObject(metadata);
+			/**
+			 * jetzt siehe die Methode helper.ToscienceHelper.getPrefLabelsResolved --
+			 * da ist das so ähnlich gemacht. Das müsste man allerdings noch rekursiv
+			 * machen und auf "@id" abfragend.
+			 */
+			// new Modify().updateMetadata(toscience, node, metadata);
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 			return "Enrichment of " + node.getPid() + " partially failed !\n"

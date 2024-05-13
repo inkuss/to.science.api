@@ -297,7 +297,8 @@ public class Resource extends MyController {
 	}
 
 	/**
-	 * Diese Methode holt (GET) den Inhalt eines beliebigen Datenstroms direkt aus der Fedora.
+	 * Diese Methode holt (GET) den Inhalt eines beliebigen Datenstroms direkt aus
+	 * der Fedora.
 	 *
 	 * @author Ingolf Kuss
 	 * @param pid Die PID der Ressource
@@ -602,6 +603,8 @@ public class Resource extends MyController {
 						modify.updateMetadata("toscience", readNode, toscienceMetadata);
 
 				play.Logger.debug("Done TOSCIENCE Mapping");
+
+				Enrich.enrichToscienceMetadata(readNode);
 
 				/**
 				 * 3. METADATA2(rdf)****************************************
