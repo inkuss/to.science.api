@@ -555,16 +555,18 @@ public class RdfUtils {
 					play.Logger.trace("subject in metadata:" + statement.getSubject());
 					play.Logger
 							.trace("predicate in metadata:" + statement.getPredicate());
+					play.Logger.trace("object in metadata:" + statement.getObject());
 					if (statement.getSubject().equals(st.getSubject())
 							&& statement.getPredicate().equals(st.getPredicate())) {
 						con.remove(statement);
-						play.Logger.debug("Statement entfernt.");
+						play.Logger.trace("Statement entfernt.");
 					}
 				}
 				play.Logger.trace("subject in graph:" + st.getSubject());
 				play.Logger.trace("predicate in graph:" + st.getPredicate());
+				play.Logger.trace("object in graph:" + st.getObject());
 				con.add(st);
-				play.Logger.debug("Statement hinzugefügt.");
+				play.Logger.trace("Statement hinzugefügt.");
 			}
 			return writeStatements(con, rdfFormat);
 		} catch (RepositoryException e) {
