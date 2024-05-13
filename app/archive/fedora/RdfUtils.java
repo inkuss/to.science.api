@@ -543,11 +543,10 @@ public class RdfUtils {
 	}
 
 	public static String replaceTriples(List<Statement> graph,
-			final String metadata) {
+			final String metadata, RDFFormat rdfFormat) {
 		try {
 			InputStream is = new ByteArrayInputStream(metadata.getBytes("UTF-8"));
-			RepositoryConnection con =
-					readRdfInputStreamToRepository(is, RDFFormat.NTRIPLES);
+			RepositoryConnection con = readRdfInputStreamToRepository(is, rdfFormat);
 			for (Statement st : graph) {
 				RepositoryResult<Statement> statements =
 						con.getStatements(null, null, null, true);
@@ -560,7 +559,7 @@ public class RdfUtils {
 				}
 				con.add(st);
 			}
-			return writeStatements(con, RDFFormat.NTRIPLES);
+			return writeStatements(con, rdfFormat);
 		} catch (RepositoryException e) {
 			throw new RdfException(e);
 		} catch (UnsupportedEncodingException e) {

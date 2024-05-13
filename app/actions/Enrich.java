@@ -63,7 +63,8 @@ public class Enrich {
 			}
 			List<Statement> enrichStatements = new ArrayList<>();
 			enrichAll(node, metadata, RDFFormat.NTRIPLES, enrichStatements);
-			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
+			metadata = RdfUtils.replaceTriples(enrichStatements, metadata,
+					RDFFormat.NTRIPLES);
 			new Modify().updateMetadata(metadata2, node, metadata);
 		} catch (Exception e) {
 			play.Logger.debug("", e);
@@ -84,7 +85,8 @@ public class Enrich {
 			}
 			List<Statement> enrichStatements = new ArrayList<>();
 			enrichAll(node, metadata, RDFFormat.NTRIPLES, enrichStatements);
-			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
+			metadata = RdfUtils.replaceTriples(enrichStatements, metadata,
+					RDFFormat.NTRIPLES);
 			play.Logger.debug("metadata2 enriched=" + metadata);
 			new Modify().updateMetadata(metadata2, node, metadata);
 		} catch (Exception e) {
@@ -112,7 +114,8 @@ public class Enrich {
 			}
 			List<Statement> enrichStatements = new ArrayList<>();
 			enrichAll(node, metadata, RDFFormat.JSONLD, enrichStatements);
-			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
+			metadata =
+					RdfUtils.replaceTriples(enrichStatements, metadata, RDFFormat.JSONLD);
 			play.Logger.debug("ToscienceMetadata enriched=" + metadata);
 			// new Modify().updateMetadata(toscience, node, metadata);
 		} catch (Exception e) {
