@@ -62,7 +62,7 @@ public class Enrich {
 				return "No metadata1 to enrich " + node.getPid();
 			}
 			List<Statement> enrichStatements = new ArrayList<>();
-			enrichAll(node, metadata, enrichStatements);
+			enrichAll(node, metadata, RDFFormat.NTRIPLES, enrichStatements);
 			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
 			new Modify().updateMetadata(metadata2, node, metadata);
 		} catch (Exception e) {
@@ -83,7 +83,7 @@ public class Enrich {
 				return "No metadata2 to enrich " + node.getPid();
 			}
 			List<Statement> enrichStatements = new ArrayList<>();
-			enrichAll(node, metadata, enrichStatements);
+			enrichAll(node, metadata, RDFFormat.NTRIPLES, enrichStatements);
 			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
 			play.Logger.debug("metadata2 enriched=" + metadata);
 			new Modify().updateMetadata(metadata2, node, metadata);
@@ -111,7 +111,7 @@ public class Enrich {
 				return "No Toscience Metadata to enrich " + node.getPid();
 			}
 			List<Statement> enrichStatements = new ArrayList<>();
-			enrichAll(node, metadata, enrichStatements);
+			enrichAll(node, metadata, RDFFormat.JSONLD, enrichStatements);
 			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
 			play.Logger.debug("ToscienceMetadata enriched=" + metadata);
 			// new Modify().updateMetadata(toscience, node, metadata);
@@ -123,10 +123,10 @@ public class Enrich {
 		return "Enrichment of " + node.getPid() + " succeeded!";
 	}
 
-	private static void enrichAll(Node node, String metadata,
+	private static void enrichAll(Node node, String metadata, RDFFormat rdfFormat,
 			List<Statement> enrichStatements) {
 		enrichInstitution(node, enrichStatements);
-		enrichAllUris(node, metadata, enrichStatements);
+		enrichAllUris(node, metadata, rdfFormat, enrichStatements);
 	}
 
 	private static void enrichInstitution(Node node,
@@ -183,9 +183,9 @@ public class Enrich {
 	}
 
 	private static void enrichAllUris(Node node, String metadata,
-			List<Statement> enrichStatements) {
+			RDFFormat rdfFormat, List<Statement> enrichStatements) {
 		try {
-			HashMap<String, String> allUris = findAllUris(metadata);
+			HashMap<String, String> allUris = findAllUris(metadata, rdfFormat);
 			for (String uri : allUris.keySet()) {
 				String label = allUris.get(uri);
 				if (label.equals(uri)) {
@@ -232,11 +232,12 @@ public class Enrich {
 		return newS;
 	}
 
-	private static HashMap<String, String> findAllUris(String metadata) {
+	private static HashMap<String, String> findAllUris(String metadata,
+			RDFFormat rdfFormat) {
 		HashMap<String, String> result = new HashMap<>();
 		try (
 				RepositoryConnection con = RdfUtils.readRdfInputStreamToRepository(
-						new ByteArrayInputStream(metadata.getBytes()), RDFFormat.NTRIPLES);
+						new ByteArrayInputStream(metadata.getBytes()), rdfFormat);
 				RepositoryResult<Statement> statements =
 						con.getStatements(null, null, null);) {
 			while (statements.hasNext()) {
