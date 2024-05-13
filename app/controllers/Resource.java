@@ -297,7 +297,8 @@ public class Resource extends MyController {
 	}
 
 	/**
-	 * Diese Methode holt (GET) den Inhalt eines beliebigen Datenstroms direkt aus der Fedora.
+	 * Diese Methode holt (GET) den Inhalt eines beliebigen Datenstroms direkt aus
+	 * der Fedora.
 	 *
 	 * @author Ingolf Kuss
 	 * @param pid Die PID der Ressource
@@ -603,6 +604,8 @@ public class Resource extends MyController {
 
 				play.Logger.debug("Done TOSCIENCE Mapping");
 
+				Enrich.enrichToscienceMetadata(readNode);
+
 				/**
 				 * 3. METADATA2(rdf)****************************************
 				 */
@@ -616,11 +619,13 @@ public class Resource extends MyController {
 				rdf = Metadata2Helper.getRdfFromToscience(new JSONObject(contentOfFile),
 						readNode);
 
+				/* hier ist es im Grunde JSON */
 				play.Logger.debug("rdf=" + rdf.toString());
 
 				String rdfContent = modify.rdfToString(
 						(Map<String, Object>) rdf.get("metadata2"), RDFFormat.NTRIPLES);
 
+				/* Jetzt ist es NTRIPLES */
 				play.Logger.debug("rdfContent=" + rdfContent);
 
 				String result3 =

@@ -77,7 +77,7 @@ public class Enrich {
 		try {
 			play.Logger.info("Enrich 2 " + node.getPid());
 			String metadata = node.getMetadata2();
-			play.Logger.debug("metadata2 " + metadata);
+			play.Logger.debug("metadata2=" + metadata);
 			if (metadata == null || metadata.isEmpty()) {
 				play.Logger.info("No metadata2 to enrich " + node.getPid());
 				return "No metadata2 to enrich " + node.getPid();
@@ -85,7 +85,36 @@ public class Enrich {
 			List<Statement> enrichStatements = new ArrayList<>();
 			enrichAll(node, metadata, enrichStatements);
 			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
+			play.Logger.debug("metadata2 enriched=" + metadata);
 			new Modify().updateMetadata(metadata2, node, metadata);
+		} catch (Exception e) {
+			play.Logger.debug("", e);
+			return "Enrichment of " + node.getPid() + " partially failed !\n"
+					+ e.getMessage();
+		}
+		return "Enrichment of " + node.getPid() + " succeeded!";
+	}
+
+	/**
+	 * @author: I. Kuss
+	 * @date: 13.05.2024
+	 * @param node der Knoten, dessen ToscienceMetadata anzureichern sind.
+	 * @return eine Erfolgs-Message
+	 */
+	public static String enrichToscienceMetadata(Node node) {
+		try {
+			play.Logger.info("Enrich Toscience " + node.getPid());
+			String metadata = node.getMetadata("toscience");
+			play.Logger.debug("ToscienceMetadata=" + metadata);
+			if (metadata == null || metadata.isEmpty()) {
+				play.Logger.info("No Toscience Metadata to enrich " + node.getPid());
+				return "No Toscience Metadata to enrich " + node.getPid();
+			}
+			List<Statement> enrichStatements = new ArrayList<>();
+			enrichAll(node, metadata, enrichStatements);
+			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
+			play.Logger.debug("ToscienceMetadata enriched=" + metadata);
+			// new Modify().updateMetadata(toscience, node, metadata);
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 			return "Enrichment of " + node.getPid() + " partially failed !\n"
