@@ -543,21 +543,22 @@ public class RdfUtils {
 	}
 
 	public static String replaceTriples(List<Statement> graph,
-			final String metadata, RDFFormat rdfFormat) {
+			final String metadata, RDFFormat rdfInFormat, RDFFormat rdfOutFormat) {
 		try {
 			InputStream is = new ByteArrayInputStream(metadata.getBytes("UTF-8"));
-			RepositoryConnection con = readRdfInputStreamToRepository(is, rdfFormat);
+			RepositoryConnection con =
+					readRdfInputStreamToRepository(is, rdfInFormat);
 			for (Statement st : graph) {
 				RepositoryResult<Statement> statements =
 						con.getStatements(null, null, null, true);
 				while (statements.hasNext()) {
 					Statement statement = statements.next();
-					play.Logger.trace("subject in metadata:" + statement.getSubject());
-					play.Logger
-							.trace("predicate in metadata:" + statement.getPredicate());
-					play.Logger.trace("object in metadata:" + statement.getObject());
 					if (statement.getSubject().equals(st.getSubject())
 							&& statement.getPredicate().equals(st.getPredicate())) {
+						play.Logger.trace("subject in metadata:" + statement.getSubject());
+						play.Logger
+								.trace("predicate in metadata:" + statement.getPredicate());
+						play.Logger.trace("object in metadata:" + statement.getObject());
 						con.remove(statement);
 						play.Logger.trace("Statement entfernt.");
 					}
@@ -568,7 +569,7 @@ public class RdfUtils {
 				con.add(st);
 				play.Logger.trace("Statement hinzugefügt.");
 			}
-			return writeStatements(con, rdfFormat);
+			return writeStatements(con, rdfOutFormat);
 		} catch (RepositoryException e) {
 			throw new RdfException(e);
 		} catch (UnsupportedEncodingException e) {
