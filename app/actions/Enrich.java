@@ -117,7 +117,7 @@ public class Enrich {
 			metadata =
 					RdfUtils.replaceTriples(enrichStatements, metadata, RDFFormat.JSONLD);
 			play.Logger.debug("ToscienceMetadata enriched=" + metadata);
-			// new Modify().updateMetadata(toscience, node, metadata);
+			new Modify().updateMetadata(toscience, node, metadata);
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 			return "Enrichment of " + node.getPid() + " partially failed !\n"
