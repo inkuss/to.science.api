@@ -19,6 +19,7 @@ package controllers;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
@@ -297,7 +299,8 @@ public class Resource extends MyController {
 	}
 
 	/**
-	 * Diese Methode holt (GET) den Inhalt eines beliebigen Datenstroms direkt aus der Fedora.
+	 * Diese Methode holt (GET) den Inhalt eines beliebigen Datenstroms direkt aus
+	 * der Fedora.
 	 *
 	 * @author Ingolf Kuss
 	 * @param pid Die PID der Ressource
@@ -322,6 +325,43 @@ public class Resource extends MyController {
 				throw new HttpArchiveException(404, e);
 			} catch (MalformedURLException e) {
 				throw new HttpArchiveException(500, e);
+			} catch (IOException e) {
+				throw new HttpArchiveException(500, e);
+			}
+		});
+	}
+
+	/**
+	 * Diese Methode holt (GET) eine WARC-Datei zu einem Webschnitt
+	 *
+	 * @author Ingolf Kuss
+	 * @param pid Die PID des Webschnitts
+	 */
+	@SuppressWarnings("resource")
+	@ApiOperation(produces = "application/octet-stream", nickname = "listWarc", value = "listWarc", notes = "Dlivers warc file of a website version", response = play.mvc.Result.class, httpMethod = "GET")
+	public static Promise<Result> listWarc(@PathParam("pid") String pid) {
+		return new ReadDataAction().call(pid, node -> {
+			Gatherconf conf = null;
+			try {
+				play.Logger.debug("Getting WARC for pid " + pid);
+				conf = Gatherconf.create(node.getConf());
+				String localDir = conf.getLocalDir();
+				play.Logger.debug("localDir=" + localDir);
+				play.Logger.debug("URL=" + conf.getUrl());
+				String urlAscii =
+						WebgatherUtils.convertUnicodeURLToAscii(conf.getUrl());
+				play.Logger.debug("urlAscii=" + urlAscii);
+				String host = urlAscii.replaceAll("^http://", "")
+						.replaceAll("^https://", "").replaceAll("/.*$", "");
+				play.Logger.debug("host=" + host);
+				String datetime = FilenameUtils.getName(localDir);
+				play.Logger.debug("datetime=" + datetime);
+				String warcFilename = "WEB-" + host + "-" + datetime.substring(0, 8);
+				play.Logger.debug("warcFilename=" + warcFilename);
+				File warcFile = new File(localDir + "/" + warcFilename + ".warc.gz");
+				return ok(warcFile);
+			} catch (FileNotFoundException e) {
+				throw new HttpArchiveException(404, e);
 			} catch (IOException e) {
 				throw new HttpArchiveException(500, e);
 			}
