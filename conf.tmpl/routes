@@ -136,7 +136,6 @@ POST /resource/:pid/addObjectTimestamp	controllers.MyUtils.addObjectTimestamp(pi
 
 GET /authors/:authorname controllers.AdhocController.getAuthorsRdf(authorname)
 GET /adhoc/:type/:name   controllers.AdhocController.getAdhocRdf(type,name)
-GET /context.json controllers.Context.getContext()
 
 GET /add/catalog					controllers.Forms.getCatalogForm(pid?="")
 GET /add/article					controllers.Forms.getArticleForm()
@@ -157,4 +156,3 @@ GET /resource/:pid/upload			controllers.Resource.getUploadForm(pid)
 
 POST /resource/:pid/activate		controllers.Resource.activateResource(pid)
 GET /browse/:facetName				controllers.Browse.browse(facetName:String,design?="")
-POST /context.json 					controllers.Context.updateContext()
