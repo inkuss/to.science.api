@@ -47,7 +47,7 @@ public class Delete extends RegalAction {
 	private String purge(Node n) {
 		StringBuffer message = new StringBuffer();
 		message.append(new Index().remove(n));
-		removeNodeFromCache(n.getPid());
+		// removeNodeFromCache(n.getPid());
 		String parentPid = n.getParentPid();
 		if (parentPid != null && !parentPid.isEmpty()) {
 			try {
@@ -71,7 +71,7 @@ public class Delete extends RegalAction {
 	private String delete(Node n) {
 		StringBuffer message = new StringBuffer();
 		message.append(new Index().remove(n));
-		removeNodeFromCache(n.getPid());
+		// removeNodeFromCache(n.getPid());
 		Globals.fedora.deleteNode(n.getPid());
 		return message.toString() + "\n" + n.getPid() + " deleted!";
 	}

@@ -30,7 +30,7 @@ public class RegalAction {
 
 	@SuppressWarnings("javadoc")
 	public Node updateIndex(String pid) {
-		removeNodeFromCache(pid);
+		// removeNodeFromCache(pid);
 		Node node = new Read().readNode(pid);
 		new Index().index(node);
 		return node;
@@ -51,8 +51,7 @@ public class RegalAction {
 	@SuppressWarnings("javadoc")
 	protected String createAggregationUri(String pid) {
 		return Globals.useHttpUris
-				? Globals.protocol + Globals.server + "/resource/" + pid
-				: pid;
+				? Globals.protocol + Globals.server + "/resource/" + pid : pid;
 	}
 
 	/**

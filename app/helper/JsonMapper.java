@@ -158,7 +158,6 @@ public class JsonMapper {
 	 * vorhanden ist.
 	 * 
 	 * @param n the node will be mapped to json ld in accordance to the profile
-	 *          ehcache
 	 */
 	public JsonMapper(final Node n) {
 		try {
