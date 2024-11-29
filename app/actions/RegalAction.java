@@ -20,7 +20,6 @@ import java.util.List;
 
 import models.Globals;
 import models.Node;
-import play.cache.Cache;
 
 /**
  * @author Jan Schnasse
@@ -30,22 +29,9 @@ public class RegalAction {
 
 	@SuppressWarnings("javadoc")
 	public Node updateIndex(String pid) {
-		// removeNodeFromCache(pid);
 		Node node = new Read().readNode(pid);
 		new Index().index(node);
 		return node;
-	}
-
-	Node readNodeFromCache(String pid) {
-		return (Node) Cache.get(pid);
-	}
-
-	void writeNodeToCache(Node node) {
-		Cache.set(node.getPid(), node);
-	}
-
-	void removeNodeFromCache(String pid) {
-		Cache.remove(pid);
 	}
 
 	@SuppressWarnings("javadoc")
