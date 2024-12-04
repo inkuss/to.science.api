@@ -45,6 +45,7 @@ public class BasicAuthAction extends Action<BasicAuth> {
 	public F.Promise<Result> call(Http.Context context) throws Throwable {
 		if (models.Globals.users.isLoggedIn(context)) {
 			// User is already logged in
+			play.Logger.debug("User is logged in");
 			return delegate.call(context);
 		} else {
 			// Look for basic auth header for api calls
@@ -54,6 +55,7 @@ public class BasicAuthAction extends Action<BasicAuth> {
 
 	public F.Promise<Result> basicAuth(Http.Context context) throws Throwable {
 		String authHeader = context.request().getHeader(AUTHORIZATION);
+		play.Logger.debug("Auth Header = " + authHeader);
 		if (authHeader == null) {
 			if (context.request().method().equals("GET")) {
 				context.session().put("role", Role.GUEST.toString());
@@ -73,9 +75,11 @@ public class BasicAuthAction extends Action<BasicAuth> {
 
 		String username = credString[0];
 		String password = credString[1];
+		play.Logger.debug("username=" + username + "; password=" + password);
 
 		User authUser = getAuthenticatedUser(username, password);
 		if (authUser != null) {
+			play.Logger.debug("role of authUser =" + authUser.getRole().toString());
 			context.session().put("role", authUser.getRole().toString());
 			return delegate.call(context);
 		}
