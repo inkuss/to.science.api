@@ -34,7 +34,8 @@ public class RegalAction {
 	public Node updateIndex(String pid) {
 		removeNodeFromCache(pid);
 		Node node = new Read().readNode(pid);
-		new Index().index(node);
+		String msg = new Index().index(node);
+		play.Logger.debug(msg);
 		return node;
 	}
 
