@@ -119,10 +119,10 @@ public class Enrich {
 			new Modify().updateKtblData(node, ktblData);
 		} catch (Exception e) {
 			play.Logger.debug("", e);
-			return "Enrichment of LRMI data of " + node.getPid() + " failed !\n"
+			return "Enrichment of KTBL data of " + node.getPid() + " failed !\n"
 					+ e.getMessage();
 		}
-		return "Enrichment LRMI data of " + node.getPid() + " succeeded !";
+		return "Enrichment KTBL data of " + node.getPid() + " succeeded !";
 	}
 
 	private static void enrichAll(Node node, String metadata,
