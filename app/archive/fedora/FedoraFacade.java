@@ -403,6 +403,9 @@ public class FedoraFacade {
 		if (node.getMetadata2File() != null) {
 			utils.updateMetadata2Stream(node);
 		}
+		if (node.getKtblDataFile() != null) {
+			utils.updateKtblDataStream(node);
+		}
 		if (node.getSeqFile() != null) {
 			utils.updateSeqStream(node);
 		}

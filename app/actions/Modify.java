@@ -1221,6 +1221,7 @@ public class Modify extends RegalAction {
 			node.setKtblDataFile(file.getAbsolutePath());
 			play.Logger.debug("file.getAbsolutePath(): " + file.getAbsolutePath());
 			node.setKtblData(content);
+			Globals.fedora.updateNode(node);
 			OaiDispatcher.makeOAISet(node);
 			play.Logger.debug("Re-Indexing node and parent");
 			reindexNodeAndParent(node);
