@@ -302,7 +302,7 @@ public class Read extends RegalAction {
 			n.setLinks(newNode.getRelsExt());
 		} catch (Exception e) {
 			Logger.error("Labels for Parts could not be added!");
-			Logger.error(e.toString());
+			Logger.error(e.getStackTrace().toString());
 		}
 	}
 
