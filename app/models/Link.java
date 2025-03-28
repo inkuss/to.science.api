@@ -51,10 +51,13 @@ public class Link implements java.io.Serializable {
 	 */
 	public Link(Link source) {
 		this.isLiteral = source.isLiteral;
-		this.predicateLabel = new String(source.predicateLabel);
-		this.predicate = new String(source.predicate);
-		this.object = new String(source.object);
-		this.objectLabel = new String(source.objectLabel);
+		this.predicateLabel = source.predicateLabel == null ? null
+				: new String(source.predicateLabel);
+		this.predicate =
+				source.predicate == null ? null : new String(source.predicate);
+		this.object = source.object == null ? null : new String(source.object);
+		this.objectLabel =
+				source.objectLabel == null ? null : new String(source.objectLabel);
 	}
 
 	/**
