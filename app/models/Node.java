@@ -197,7 +197,7 @@ public class Node implements java.io.Serializable {
 	 * @param obj the object or namespaced node-pid
 	 */
 	public void removeRelation(String pred, String obj) {
-		Vector<Link> newRels = new Vector<Link>();
+		Vector<Link> newRels = new Vector<>();
 		for (Link link : links) {
 			if (link.getPredicate().compareTo(pred) == 0
 					&& link.getObject().compareTo(obj) == 0) {
@@ -228,8 +228,8 @@ public class Node implements java.io.Serializable {
 	 * @param newLinks all relations of the node
 	 * @return this
 	 */
-	private Node setLinks(List<Link> newLinks) {
-		links = new Vector<Link>();
+	public Node setLinks(List<Link> newLinks) {
+		links = new Vector<>();
 		for (Link link : newLinks) {
 			addRelation(link);
 		}

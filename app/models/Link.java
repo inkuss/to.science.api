@@ -25,7 +25,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
  * 
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  */
-public class Link  implements java.io.Serializable  {
+public class Link implements java.io.Serializable {
 	boolean isLiteral = false;
 	private String predicateLabel = null;
 	private String predicate = null;
@@ -38,6 +38,23 @@ public class Link  implements java.io.Serializable  {
 	 */
 	public Link() {
 
+	}
+
+	/**
+	 * Dieser Konstruktor kopiert ein vorhandenes Objekt. Dabei wid Speicherplatz
+	 * physikalisch neu vergeben, es werden nicht nur Referenzen gesetzt. Um
+	 * "concurrentModificationException"s zu vermeiden.
+	 * 
+	 * @author Ingolf Kuss
+	 * @date 2025-03-28
+	 * @param source the source Link to copy from
+	 */
+	public Link(Link source) {
+		this.isLiteral = source.isLiteral;
+		this.predicateLabel = new String(source.predicateLabel);
+		this.predicate = new String(source.predicate);
+		this.object = new String(source.object);
+		this.objectLabel = new String(source.objectLabel);
 	}
 
 	/**

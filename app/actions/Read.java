@@ -277,12 +277,31 @@ public class Read extends RegalAction {
 	}
 
 	void addLabelsForParts(Node n) {
-		List<Link> rels = n.getRelsExt();
-		for (Link l : rels) {
-			if (HAS_PART.equals(l.getPredicate())
-					|| IS_PART_OF.equals(l.getPredicate())) {
-				addLabel(n, l);
+		try {
+			List<Link> newRels = new ArrayList<>();
+			// Physikalisches Kopieren der Liste, nicht nur als Referenzen
+			for (Link l : n.getRelsExt()) {
+				Link newLink = new Link(l);
+				newRels.add(newLink);
 			}
+
+			/*
+			 * Erzeuge einen temporären Node. Dieser wird nur zur Zwischenspeicherung
+			 * der kopierten relsExt benutzt -- solange diese modifiziert werden --
+			 * und um auf die Node-eigenen Methoden "removeRelation" und "addRelation"
+			 * zugreifen zu können.
+			 */
+			Node newNode = new Node();
+			newNode.setLinks(newRels);
+			for (Link l : newRels) {
+				if (HAS_PART.equals(l.getPredicate())
+						|| IS_PART_OF.equals(l.getPredicate())) {
+					addLabel(newNode, l);
+				}
+			}
+			n.setLinks(newNode.getRelsExt());
+		} catch (Exception e) {
+			Logger.error("Labels for Parts could not be added!");
 		}
 	}
 
@@ -293,12 +312,14 @@ public class Read extends RegalAction {
 			n.removeRelation(l.getPredicate(), l.getObject());
 			n.addRelation(l);
 		} catch (Exception e) {
-
+			Logger.error(e.getMessage());
 		}
 	}
 
 	/**
+	 * 
 	 * @param pid the pid of the node
+	 * 
 	 * @return a Map that represents the node
 	 */
 	public Map<String, Object> readNodeFromIndex(String pid) {
@@ -800,9 +821,8 @@ public class Read extends RegalAction {
 						.equals(Gatherconf.CrawlerSelection.wpull)) {
 					entries.put("crawlControllerState",
 							WpullCrawl.getCrawlControllerState(node));
-					entries.put("crawlExitStatus",
-							WpullCrawl.getCrawlExitStatus(node) < 0 ? ""
-									: WpullCrawl.getCrawlExitStatus(node));
+					entries.put("crawlExitStatus", WpullCrawl.getCrawlExitStatus(node) < 0
+							? "" : WpullCrawl.getCrawlExitStatus(node));
 				}
 				/*
 				 * Launch Count als Summe der Launches über alle Crawler ermitteln -
