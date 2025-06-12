@@ -57,6 +57,7 @@ GET /resource/:pid/status			controllers.Resource.getStatus(pid)
 GET /resource/:pid/conf			    controllers.Resource.listConf(pid)
 GET /resource/:pid/urlHist			controllers.Resource.listUrlHist(pid)
 GET /resource/:pid/title		    controllers.Resource.listTitle(pid)
+GET /resource/:pid/crawlerrors		    controllers.Resource.listCrawlErrors(pid,crawllog?="")
 
 PUT /resource/:pid/parts			controllers.Resource.updateSeq(pid)
 PUT /resource/:pid/metadata			controllers.Resource.updateMetadata(pid)

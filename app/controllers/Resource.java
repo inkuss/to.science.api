@@ -19,6 +19,7 @@ package controllers;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
@@ -84,6 +86,7 @@ import play.libs.F.Promise;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
+import play.twirl.api.Content;
 import play.twirl.api.Html;
 import views.html.edit;
 import views.html.frlResource;
@@ -1493,6 +1496,58 @@ public class Resource extends MyController {
 		} catch (Exception e) {
 			return HtmlMessage(new Message(e, 500));
 		}
+	}
+
+	/*
+	 * Returns a list of all errors that occurred during the web crawling
+	 * 
+	 * @param pid Die PID einer Webpage (nicht: Webschnitt)
+	 * 
+	 * @param crawllog Der volle Pfad zum gewünschten Crawl-Log, oder leer. Falls
+	 * leer, wird das neueste Log zu der PID gesucht.
+	 * 
+	 * @author I. Kuss
+	 * 
+	 * @date 2025-06-12
+	 * 
+	 * @ref TOSDEV-5, TOS-1295
+	 */
+	@ApiOperation(produces = "application/json,text/html,text/csv", nickname = "listCrawlErrors", value = "listCrawlErrors", notes = "Returns a list of all errors that occurred during the web crawling", httpMethod = "GET")
+	public static Promise<Result> listCrawlErrors(@PathParam("pid") String pid,
+			@QueryParam("crawllog") String crawllog) {
+		return new ListAction().call((userId) -> {
+			try {
+				String logpath = crawllog;
+				if (logpath.isEmpty()) {
+					// Suche das neueste Crawl-Log
+					throw new RuntimeException("No logpath for webpage " + pid + "!");
+				}
+				File logfile = new File(logpath);
+				if (!logfile.isFile()) {
+					throw new RuntimeException(
+							"Crawl Log File " + logpath + " is not a regular file!");
+				}
+				String errorspath =
+						new String(logpath).replaceFirst(".log$", "errors.log");
+				File errorsfile = new File(errorspath);
+				if (!errorsfile.exists()) {
+					// Lege eine Datei crawlerrors.log mit allen Fehlermeldungen an
+					throw new RuntimeException(
+							"No errors file for log file" + logpath + "!");
+				}
+				/* Lese Errors-Datei Zeile für Zeile */
+				List<String> lines = FileUtils.readLines(errorsfile, "utf-8");
+				if (request().accepts("text/html")) {
+					return ok((Content) lines);
+				}
+				return getJsonResult(lines);
+			} catch (HttpArchiveException e) {
+				return JsonMessage(new Message(e, e.getCode()));
+			} catch (Exception e) {
+				play.Logger.error(e.toString());
+				return JsonMessage(new Message(json(e)));
+			}
+		});
 	}
 
 	@ApiOperation(produces = "application/json", nickname = "addDoi", value = "addDoi", notes = "Adds a Doi and performes a registration at Datacite", response = String.class, httpMethod = "POST")
