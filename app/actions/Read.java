@@ -31,6 +31,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -333,6 +334,8 @@ public class Read extends RegalAction {
 	}
 
 	/**
+	 * Diese Methode liefert den Baum zurück. Zur Anzeige im Frontend.
+	 * 
 	 * @param node a regal node
 	 * @param style if "short".equals(style), a shortened representation will be
 	 *          returned
@@ -342,25 +345,41 @@ public class Read extends RegalAction {
 		if ("D".equals(node.getState())) {
 			return null;
 		}
-		Map<String, Object> nm = node.getLd2();
+		/*
+		 * Hier darf auf keinen Fall getLd2() aufgerufen werden, denn das zieht alle
+		 * Metadaten durch den RDF-Konverter RdfUtils.readRdfToGraph() und ist bei
+		 * großen Bäumen zu Ressourcen-intensiv (Laufzeit, Memory)
+		 */
+		// Map<String, Object> nm = node.getLd2();
+		Map<String, Object> rdf = new HashMap<>();
+		/*
+		 * wir benötigen nur die Elemente "@id", "title", "contentType" und ggfs.
+		 * "hasPart"
+		 */
+		rdf.put("@id", node.getPid());
+		/*
+		 * Der Titel soll im DC-Datenstrom hinterlegt werden und von dort geholt
+		 * werden. Evtl. auch aus dem neuen toscience-Datenstrom. => ToDo
+		 */
+		rdf.put("title", "dummy");
+		rdf.put("contentType", node.getContentType());
 
-		@SuppressWarnings("unchecked")
-		List<Map<String, Object>> parts =
-				(List<Map<String, Object>>) nm.get("hasPart");
-		List<Map<String, Object>> children = new ArrayList<Map<String, Object>>();
-		if (parts != null) {
-			for (Map<String, Object> part : parts) {
-				String id = (String) part.get("@id");
+		Collection<Link> ls = node.getRelsExt();
+		List<Map<String, Object>> children = new ArrayList<>();
+		for (Link l : ls) {
+			if (HAS_PART.equals(l.getPredicate())) {
+				String id = l.getObject();
+				// String value = l.getObjectLabel();
+				Map<String, Object> c =
+						getPartsAsTree(internalReadNode(id), style); /* Rekursion */
 				Map<String, Object> child = new HashMap<>();
-				Map<String, Object> c = getPartsAsTree(internalReadNode(id), style);
-				if (c != null) {
-					child.put(id, c);
-					children.add(child);
-				}
+				child.put(id, c);
+				children.add(child);
 			}
-			nm.put("hasPart", children);
 		}
-		return nm;
+		rdf.put("hasPart", children);
+
+		return rdf;
 	}
 
 	/**
