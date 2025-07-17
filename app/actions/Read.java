@@ -362,22 +362,28 @@ public class Read extends RegalAction {
 		 * werden. Evtl. auch aus dem neuen toscience-Datenstrom. => ToDo
 		 */
 		rdf.put("title", "dummy");
+		rdf.put("prefLabel", "dummy");
 		rdf.put("contentType", node.getContentType());
 
 		Collection<Link> ls = node.getRelsExt();
-		List<Map<String, Object>> children = new ArrayList<>();
+		// List<Map<String, Object>> children = new ArrayList<>();
+		Collection<Object> list = new ArrayList<>();
+		Map<String, Object> resolvedObject = null;
 		for (Link l : ls) {
 			if (HAS_PART.equals(l.getPredicate())) {
 				String id = l.getObject();
 				// String value = l.getObjectLabel();
+				resolvedObject = new HashMap<>();
+				resolvedObject.put("@id", id);
+				resolvedObject.put("prefLabel", id);
+				resolvedObject.put("contentType", "part");
 				Map<String, Object> c =
 						getPartsAsTree(internalReadNode(id), style); /* Rekursion */
-				Map<String, Object> child = new HashMap<>();
-				child.put(id, c);
-				children.add(child);
+				resolvedObject.put("hasPart", c);
+				list.add(resolvedObject);
 			}
 		}
-		rdf.put("hasPart", children);
+		rdf.put("hasPart", list);
 
 		return rdf;
 	}
