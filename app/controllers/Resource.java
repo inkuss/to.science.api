@@ -1515,7 +1515,7 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json,text/html,text/csv", nickname = "listCrawlErrors", value = "listCrawlErrors", notes = "Returns a list of all errors that occurred during the web crawling", httpMethod = "GET")
 	public static Promise<Result> listCrawlErrors(@PathParam("pid") String pid,
 			@QueryParam("crawllog") String crawllog) {
-		return new ListAction().call((userId) -> {
+		return new ReadMetadataAction().call(pid, userId -> {
 			try {
 				String logpath = crawllog;
 				if (logpath.isEmpty()) {
