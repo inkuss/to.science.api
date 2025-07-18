@@ -289,8 +289,8 @@ public class FedoraFacade {
 	 * @return Node
 	 */
 	public Node readTreeNode(String pid) {
-		if (!nodeExists(pid))
-			throw new NodeNotFoundException(404, pid);
+		// if (!nodeExists(pid))
+		// throw new NodeNotFoundException(404, pid);
 		Node node = new Node();
 		node.setPID(pid);
 		/* hier könnte der Titel drin stehen */
