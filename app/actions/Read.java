@@ -363,10 +363,13 @@ public class Read extends RegalAction {
 		 */
 		List<String> title = new ArrayList<String>();
 		if (node.getLabel() != null) {
+			play.Logger.info("node.getLabel: " + node.getLabel());
 			title.add(node.getLabel());
 		} else if (node.getFileLabel() != null) {
+			play.Logger.info("node.getFileLabel: " + node.getFileLabel());
 			title.add(node.getFileLabel());
 		} else {
+			play.Logger.info("node.getPid: " + node.getPid());
 			title.add(node.getPid());
 		}
 		rdf.put("title", title);
