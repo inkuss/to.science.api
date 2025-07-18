@@ -282,6 +282,26 @@ public class FedoraFacade {
 		return node;
 	}
 
+	/**
+	 * Nur das Nötigste zum Aufbau des Baumes
+	 * 
+	 * @param pid PID
+	 * @return Node
+	 */
+	public Node readTreeNode(String pid) {
+		if (!nodeExists(pid))
+			throw new NodeNotFoundException(404, pid);
+		Node node = new Node();
+		node.setPID(pid);
+		/* hier könnte der Titel drin stehen */
+		// getDublinCoreFromFedora(node);
+		/* das holt die Kindobjekte, und auch den ContentType der Kinder */
+		getRelsExtFromFedora(node);
+		/* das holt das fileLabel */
+		getChecksumFromFedora(node);
+		return node;
+	}
+
 	private void getObjectTimestampFromFedora(Node node) {
 		try {
 			FedoraResponse response =

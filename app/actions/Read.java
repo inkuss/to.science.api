@@ -379,8 +379,17 @@ public class Read extends RegalAction {
 				String id = l.getObject();
 				// String value = l.getObjectLabel();
 				Map<String, Object> child = new HashMap<>();
+				Node childNode = readNodeFromCache(id);
+				if (childNode == null) {
+					childNode = Globals.fedora.readTreeNode(id);
+					/*
+					 * da der Node nur unvollständig eingelesen wurde, schreiben wir ihn
+					 * nicht zurück in den Cache
+					 */
+					// writeNodeToCache(childNode);
+				}
 				Map<String, Object> c =
-						getPartsAsTree(internalReadNode(id), style); /* Rekursion */
+						getPartsAsTree(childNode, style); /* Rekursion */
 				if (c != null) {
 					child.put(id, c);
 					children.add(child);
