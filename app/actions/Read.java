@@ -362,10 +362,7 @@ public class Read extends RegalAction {
 		 * werden. Evtl. auch aus dem neuen toscience-Datenstrom. => ToDo
 		 */
 		List<String> title = new ArrayList<String>();
-		if (node.getLabel() != null) {
-			play.Logger.info("node.getLabel: " + node.getLabel());
-			title.add(node.getLabel());
-		} else if (node.getFileLabel() != null) {
+		if (node.getFileLabel() != null) {
 			play.Logger.info("node.getFileLabel: " + node.getFileLabel());
 			title.add(node.getFileLabel());
 		} else {
