@@ -296,9 +296,12 @@ public class FedoraFacade {
 		/* hier könnte der Titel drin stehen */
 		// getDublinCoreFromFedora(node);
 		/* das holt die Kindobjekte, und auch den ContentType der Kinder */
+		play.Logger.info("Vor getRelsExtFromFedora(childNode)");
 		getRelsExtFromFedora(node);
 		/* das holt das fileLabel */
+		play.Logger.info("Vor getChecksumFromFedora(childNode)");
 		getChecksumFromFedora(node);
+		play.Logger.info("Nach getChecksumFromFedora(childNode)");
 		return node;
 	}
 
