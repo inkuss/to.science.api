@@ -374,25 +374,17 @@ public class Read extends RegalAction {
 
 		Collection<Link> ls = node.getRelsExt();
 		List<Map<String, Object>> children = new ArrayList<Map<String, Object>>();
-		// Collection<Object> list = new ArrayList<>();
-		// Map<String, Object> resolvedObject = null;
 		for (Link l : ls) {
 			if (HAS_PART.equals(l.getPredicate())) {
 				String id = l.getObject();
 				// String value = l.getObjectLabel();
-				// resolvedObject = new HashMap<>();
-				// resolvedObject.put("@id", id);
-				// resolvedObject.put("prefLabel", id);
-				// resolvedObject.put("contentType", "part");
 				Map<String, Object> child = new HashMap<>();
 				Map<String, Object> c =
 						getPartsAsTree(internalReadNode(id), style); /* Rekursion */
-				// resolvedObject.put("hasPart", c);
 				if (c != null) {
 					child.put(id, c);
 					children.add(child);
 				}
-				// list.add(resolvedObject);
 			}
 		}
 		rdf.put("hasPart", children);
