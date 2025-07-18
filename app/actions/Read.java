@@ -362,7 +362,13 @@ public class Read extends RegalAction {
 		 * werden. Evtl. auch aus dem neuen toscience-Datenstrom. => ToDo
 		 */
 		List<String> title = new ArrayList<String>();
-		title.add("dummy");
+		if (node.getLabel() != null) {
+			title.add(node.getLabel());
+		} else if (node.getFileLabel() != null) {
+			title.add(node.getFileLabel());
+		} else {
+			title.add(node.getPid());
+		}
 		rdf.put("title", title);
 		rdf.put("contentType", node.getContentType());
 
