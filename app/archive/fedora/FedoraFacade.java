@@ -298,10 +298,12 @@ public class FedoraFacade {
 		/* das holt die Kindobjekte, und auch den ContentType der Kinder */
 		play.Logger.info("Vor getRelsExtFromFedora(childNode)");
 		getRelsExtFromFedora(node);
+		play.Logger.info("Nach getRelsExtFromFedora(childNode)");
 		/* das holt das fileLabel */
-		play.Logger.info("Vor getChecksumFromFedora(childNode)");
-		getChecksumFromFedora(node);
-		play.Logger.info("Nach getChecksumFromFedora(childNode)");
+		/* nicht benötigt, wenn man den Titel aus Metadata2 liest */
+		// play.Logger.info("Vor getChecksumFromFedora(childNode)");
+		// getChecksumFromFedora(node);
+		// play.Logger.info("Nach getChecksumFromFedora(childNode)");
 		return node;
 	}
 

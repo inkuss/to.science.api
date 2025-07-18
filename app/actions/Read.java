@@ -24,10 +24,12 @@ import helper.JsonMapper;
 import helper.Webgatherer;
 import helper.WpullCrawl;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,6 +61,8 @@ import archive.fedora.FedoraVocabulary;
 import archive.fedora.RdfUtils;
 import archive.fedora.UrlConnectionException;
 import archive.fedora.XmlUtils;
+import de.hbz.lobid.helper.EtikettMakerInterface;
+import de.hbz.lobid.helper.JsonConverter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -71,6 +75,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
  */
 @IgnoreSizeOf
 public class Read extends RegalAction {
+	EtikettMakerInterface profile = Globals.profile;
 
 	/**
 	 * @param pid the will be read to the node
@@ -350,8 +355,19 @@ public class Read extends RegalAction {
 		 * Metadaten durch den RDF-Konverter RdfUtils.readRdfToGraph() und ist bei
 		 * großen Bäumen zu Ressourcen-intensiv (Laufzeit, Memory)
 		 */
-		// Map<String, Object> nm = node.getLd2();
-		Map<String, Object> rdf = new HashMap<>();
+		Map<String, Object> m = null;
+		try {
+			// JsonMapper jsonMapper = new JsonMapper(node);
+			InputStream stream = new ByteArrayInputStream(
+					node.getMetadata2().getBytes(StandardCharsets.UTF_8));
+			JsonConverter jsonConverter = new JsonConverter(profile);
+			m = jsonConverter.convert(node.getPid(), stream, RDFFormat.NTRIPLES,
+					profile.getContext().get("@context"));
+		} catch (Exception e) {
+			play.Logger.trace(node.getPid() + " has no descriptive Metadata2!");
+			play.Logger.trace("", e);
+		}
+		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 		/*
 		 * wir benötigen nur die Elemente "@id", "title", "contentType" und ggfs.
 		 * "hasPart"
@@ -361,15 +377,12 @@ public class Read extends RegalAction {
 		 * Der Titel soll im DC-Datenstrom hinterlegt werden und von dort geholt
 		 * werden. Evtl. auch aus dem neuen toscience-Datenstrom. => ToDo
 		 */
-		List<String> title = new ArrayList<String>();
-		if (node.getFileLabel() != null) {
-			play.Logger.info("node.getFileLabel: " + node.getFileLabel());
-			title.add(node.getFileLabel());
-		} else {
-			play.Logger.info("node.getPid: " + node.getPid());
-			title.add(node.getPid());
-		}
-		rdf.put("title", title);
+		/**
+		 * List<String> title = new ArrayList<String>(); if (node.getFileLabel() !=
+		 * null) { play.Logger.info("node.getFileLabel: " + node.getFileLabel());
+		 * title.add(node.getFileLabel()); } else { play.Logger.info("node.getPid: "
+		 * + node.getPid()); title.add(node.getPid()); } rdf.put("title", title);
+		 */
 		rdf.put("contentType", node.getContentType());
 
 		Collection<Link> ls = node.getRelsExt();
