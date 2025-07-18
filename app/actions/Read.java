@@ -361,8 +361,9 @@ public class Read extends RegalAction {
 		 * Der Titel soll im DC-Datenstrom hinterlegt werden und von dort geholt
 		 * werden. Evtl. auch aus dem neuen toscience-Datenstrom. => ToDo
 		 */
-		rdf.put("title", "dummy");
-		rdf.put("prefLabel", "dummy");
+		List<String> title = new ArrayList<String>();
+		title.add("dummy");
+		rdf.put("title", title);
 		rdf.put("contentType", node.getContentType());
 
 		Collection<Link> ls = node.getRelsExt();
