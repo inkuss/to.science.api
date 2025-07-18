@@ -396,7 +396,7 @@ public class Read extends RegalAction {
 			}
 		}
 		rdf.put("hasPart", children);
-
+		play.Logger.info("getPartsAsTree: " + rdf.toString());
 		return rdf;
 	}
 
