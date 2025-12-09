@@ -160,7 +160,7 @@ public class Gatherconf {
 		openWaybackLink = null;
 		id = null;
 		quellserverWebschnittPid = null;
-		deleteOptionQuellserverWebschnitt = deleteOptions.keep;
+		deleteOptionQuellserverWebschnitt = DeleteOptions.keep;
 		maxCrawlSize = 0;
 		waitSecBtRequests = 0;
 		randomWait = true;
@@ -424,7 +424,7 @@ public class Gatherconf {
 	 *         which it had been imported will be deleted. If option
 	 *         "deleteComplete" is chosen, it will be deleted with webarchives.
 	 */
-	public String getDeleteOptionQuellserverWebschnitt() {
+	public  getDeleteOptionQuellserverWebschnitt() {
 		return deleteOptionQuellserverWebschnitt;
 	}
 
