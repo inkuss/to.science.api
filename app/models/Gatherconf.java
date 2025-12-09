@@ -38,6 +38,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.Modify;
+import actions.Delete.deleteOptions;
+import actions.Delete.deleteOptions.*;
 import helper.WebgatherUtils;
 
 /**
@@ -50,7 +52,7 @@ public class Gatherconf {
 	@SuppressWarnings("javadoc")
 	public enum Interval {
 		annually, halfYearly, quarterly, monthly, weekly, daily, once
-	};
+	}
 
 	@SuppressWarnings("javadoc")
 	public enum RobotsPolicy {
@@ -124,7 +126,7 @@ public class Gatherconf {
 	// id = die PID des Webschnittes (= WebpageVersion)
 	String id;
 	String quellserverWebschnittPid;
-	boolean deleteQuellserverWebschnitt;
+	String deleteOptionQuellserverWebschnitt;
 	long maxCrawlSize;
 	int waitSecBtRequests;
 	boolean randomWait;
@@ -158,7 +160,7 @@ public class Gatherconf {
 		openWaybackLink = null;
 		id = null;
 		quellserverWebschnittPid = null;
-		deleteQuellserverWebschnitt = false;
+		deleteOptionQuellserverWebschnitt = deleteOptions.keep;
 		maxCrawlSize = 0;
 		waitSecBtRequests = 0;
 		randomWait = true;
@@ -417,21 +419,24 @@ public class Gatherconf {
 	}
 
 	/**
-	 * @return a flag (true or false) which indicates whether the original
-	 *         WebpageVersion on the server from which it had been imported will
-	 *         be deleted
+	 * @return an Option (allowed values: keep, delete, deleteComplete) which
+	 *         indicates whether the original WebpageVersion on the server from
+	 *         which it had been imported will be deleted. If option
+	 *         "deleteComplete" is chosen, it will be deleted with webarchives.
 	 */
-	public boolean getDeleteQuellserverWebschnitt() {
-		return deleteQuellserverWebschnitt;
+	public String getDeleteOptionQuellserverWebschnitt() {
+		return deleteOptionQuellserverWebschnitt;
 	}
 
 	/**
-	 * @param flag a flag (true or false) which indicates whether the original
+	 * @param deleteOption an Option (allowed values: keep, delete,
+	 *          deleteComplete) which indicates whether the original
 	 *          WebpageVersion on the server from which it had been imported will
-	 *          be deleted
+	 *          be deleted. If option "deleteComplete" is chosen, it will be
+	 *          deleted with webarchives.
 	 */
-	public void setDeleteQuellserverWebschnitt(boolean flag) {
-		this.deleteQuellserverWebschnitt = flag;
+	public void setDeleteOptionQuellserverWebschnitt(String deleteOption) {
+		this.deleteOptionQuellserverWebschnitt = deleteOption;
 	}
 
 	/**

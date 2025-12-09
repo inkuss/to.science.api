@@ -52,6 +52,16 @@ import net.sf.ehcache.pool.sizeof.annotations.IgnoreSizeOf;
 public class Delete extends RegalAction {
 
 	/**
+	 * Mögliche Optionen für das Löschen von entfernten Objekten. Bei "delete"
+	 * werden deren Webarchivdateien behalten, bei "deleteComplete" werden auch
+	 * diese entfernt. Bei "keep" werden entfernte Objekte nicht gelöscht.
+	 */
+	@SuppressWarnings("javadoc")
+	public enum DeleteOptions {
+		keep, delete, deleteComplete
+	}
+
+	/**
 	 * Deletes only this single node. Child objects will remain.
 	 * 
 	 * @param n a node to delete

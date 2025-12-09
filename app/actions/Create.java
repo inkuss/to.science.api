@@ -542,13 +542,14 @@ public class Create extends RegalAction {
 	 *          server
 	 * @param quellserverWebschnittPid The PID of the source WebpageVersion
 	 *          (Webschnitt) on the source server
-	 * @param deleteQuellserverWebschnitt Flag, ob Webschnitt auf dem Quellserver
-	 *          am Ende gelöscht werden soll
+	 * @param deleteQuellserverWebschnitt Option, ob Webschnitt auf dem
+	 *          Quellserver am Ende gelöscht werden soll und falls ja, mit oder
+	 *          ohne Webarchive
 	 * @throws RuntimeException eine Ausnahmebehandlung
 	 */
 	public void importWebpageVersion(Node n, String versionPid,
 			String quellserverWebpagePid, String quellserverWebschnittPid,
-			boolean deleteQuellserverWebschnitt) throws RuntimeException {
+			String deleteQuellserverWebschnitt) throws RuntimeException {
 
 		Gatherconf conf = null;
 		try {
@@ -586,7 +587,7 @@ public class Create extends RegalAction {
 			 */
 			conf.setQuellserverWebpagePid(quellserverWebpagePid);
 			conf.setQuellserverWebschnittPid(quellserverWebschnittPid);
-			conf.setDeleteQuellserverWebschnitt(deleteQuellserverWebschnitt);
+			conf.setDeleteOptionQuellserverWebschnitt(deleteQuellserverWebschnitt);
 
 			// Erzeuge lokales Datenverzeichnis localpath und
 			// hole angemountetes Datenverzeichnis remotepath
@@ -644,7 +645,8 @@ public class Create extends RegalAction {
 			importThread.setRenotepath(remotepath);
 			importThread.setVersionPid(versionPid);
 			importThread.setQuellserverWebschnittPid(quellserverWebschnittPid);
-			importThread.setDeleteQuellserverWebschnitt(deleteQuellserverWebschnitt);
+			importThread
+					.setDeleteOptionQuellserverWebschnitt(deleteQuellserverWebschnitt);
 			importThread.start();
 			// fertig
 
