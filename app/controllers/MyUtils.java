@@ -52,6 +52,7 @@ import models.Node;
 import models.ToScienceObject;
 import play.libs.F.Promise;
 import play.mvc.Result;
+import views.Title;
 
 /**
  * 
@@ -158,6 +159,13 @@ public class MyUtils extends MyController {
 			@QueryParam("alephid") String alephid) {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
+			/*
+			 * Hier einbauen für TOSDEV-32: 1. den noch vorhandenen alten Titel aus
+			 * dem noch unmodifizierten Node lesen 2. das LB-Kennzeichen aus dem alten
+			 * Titel extrahieren "und in den Modify einbauen"
+			 */
+			String title = Title.getTitle(node.getLd2());
+			play.Logger.debug("lobidify Titel=" + title);
 			if (alephid != null && !alephid.isEmpty()) {
 				String result2 = modify.lobidify2(node, alephid);
 				return JsonMessage(
