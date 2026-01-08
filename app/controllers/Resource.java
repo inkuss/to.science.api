@@ -98,6 +98,7 @@ import views.html.oai.oaidc;
 import views.html.oai.wgl;
 import views.html.tags.getTitle;
 import views.Helper;
+import views.Title;
 
 /**
  * In dieser Klasse werden API-Calls (Endpoint-Calls) auf Ressourcen (sub-path
@@ -1588,6 +1589,13 @@ public class Resource extends MyController {
 				} else {
 					node = create.createResource(namespace, object);
 				}
+				/*
+				 * Hier einbauen für TOSDEV-32: 1. den noch vorhandenen alten Titel aus
+				 * dem noch unmodifizierten Node lesen 2. das LB-Kennzeichen aus dem
+				 * alten Titel extrahieren "und in den Modify einbauen"
+				 */
+				String title = Title.getTitle(node.getLd2());
+				play.Logger.debug("Titel=" + title);
 				String message = modify.lobidify2(node, alephId);
 				flash("message", message);
 				return redirect(routes.Resource.listResource(node.getPid(), null));
