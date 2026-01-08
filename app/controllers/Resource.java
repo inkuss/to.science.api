@@ -472,6 +472,13 @@ public class Resource extends MyController {
 
 				play.Logger.debug("toscienceJson will be mapped");
 
+				/*
+				 * Hier einbauen für TOSDEV-32: 1. den noch vorhandenen alten Titel aus
+				 * dem noch unmodifizierten Node lesen 2. das LB-Kennzeichen aus dem
+				 * alten Titel extrahieren "und in den Modify einbauen"
+				 */
+				String title = Title.getTitle(readNode.getLd2());
+				play.Logger.debug("update Metadata Titel=" + title);
 				Map<String, Object> rdf = RdfHelper.getRdfAsMap(readNode,
 						RDFFormat.NTRIPLES, request().body().asText());
 				allMetadata = new JSONObject(new JSONObject(rdf).toString());
