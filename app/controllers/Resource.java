@@ -479,6 +479,11 @@ public class Resource extends MyController {
 				 */
 				String title = Title.getTitle(readNode.getLd2());
 				play.Logger.debug("update Metadata Titel=" + title);
+				/**
+				 * Falls der alte Titel mit einem LB-Kennzeichen beginnt, stelle dieses
+				 * dem neuen Titel ebenfalls voran. Zusätzlich wird das LB-Kennzeichen
+				 * auch noch als separates Feld im toscience-Datenstrom hinterlegt.
+				 */
 				Map<String, Object> rdf = RdfHelper.getRdfAsMap(readNode,
 						RDFFormat.NTRIPLES, request().body().asText());
 				allMetadata = new JSONObject(new JSONObject(rdf).toString());
@@ -1596,13 +1601,6 @@ public class Resource extends MyController {
 				} else {
 					node = create.createResource(namespace, object);
 				}
-				/*
-				 * Hier einbauen für TOSDEV-32: 1. den noch vorhandenen alten Titel aus
-				 * dem noch unmodifizierten Node lesen 2. das LB-Kennzeichen aus dem
-				 * alten Titel extrahieren "und in den Modify einbauen"
-				 */
-				String title = Title.getTitle(node.getLd2());
-				play.Logger.debug("Titel=" + title);
 				String message = modify.lobidify2(node, alephId);
 				flash("message", message);
 				return redirect(routes.Resource.listResource(node.getPid(), null));
