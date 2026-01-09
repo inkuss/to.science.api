@@ -299,8 +299,8 @@ public class Modify extends RegalAction {
 				String toscienceMetadata =
 						TosHelper.getToPersistTosMd(allMetadata.toString(), pid);
 
-				toscienceJson = TosHelper
-						.getPrefLabelsResolved(new JSONObject(toscienceMetadata));
+				toscienceJson =
+						TosHelper.getPrefLabelsResolved(new JSONObject(toscienceMetadata));
 
 				if (Helper.mdStreamExists(pid, "ktbl")) {
 					toscienceJson = TosHelper.getPrefLabelsResolved(new JSONObject(
