@@ -129,6 +129,11 @@ public abstract class Vocabulary {
 	public final static String REL_LOBID_DOI =
 			"http://purl.org/ontology/bibo/doi";
 
+	/**
+	 * This is how lobid stores the title
+	 */
+	public final static String REL_TITLE = "http://purl.org/dc/terms/title";
+
 	public final static String metadata1 = "metadata";
 	public final static String metadata2 = "metadata2";
 	public final static String lrmiData = "lrmiData";

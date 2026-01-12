@@ -1003,19 +1003,16 @@ public class Utils {
 	}
 
 	/**
-	 * Diese Methode ergänzt den "Data-Provider" (z.B. ein
-	 * Landesbibliothekskürzel) in den neuen Metadaten. Die neuen Metadaten kommen
-	 * i.d.R. direkt von lobid und erhalten den Data-Provider nicht.
+	 * Diese Methode ermittelt den "Data-Provider" (z.B. ein
+	 * Landesbibliothekskürzel) bei Neuanlage oder Update einer Ressource.
 	 * 
 	 * @author I. Kuss für TOSDEV-32
 	 * @param node der Node so wie er vor dem Update ist, also mit alten Metadaten
-	 *          bzw. alten Titel.
-	 * @param content der neue Inhalt der Metadaten, durch den ersetzt werden
-	 *          soll. Direkt von lobid, also ohne Data-Provider.
-	 * @return der neue Inhalt der Metadaten mit Data-Provider(-Kürzel).
+	 *          bzw. dem alten vorläufigen Titel.
+	 * @return der Data-Provider (Kürzel gem. kontrolliertem Fedora-Vokabular).
 	 */
-	public static String preserveDataProvider(Node node, String content) {
-		String content_new = content;
+	public static String getDataProvider(Node node) {
+		String associated_data_provider = null;
 		/**
 		 * In der ersten Realisationsphase wird Data-Provider aus dem manuell
 		 * erfassten, tenporären Titel ermittelt. Dieses Verfahren soll in einer
@@ -1027,48 +1024,25 @@ public class Utils {
 		 */
 		String title = Title.getTitle(node.getLd2());
 		if (title.isEmpty()) {
-			// kein Data-Provider bekannt
-			return content_new;
+			play.Logger.debug("Kein Titel am Objekt PID=" + node.getPid() + "!");
+			return associated_data_provider;
 		}
 		play.Logger.debug("alter Titel=" + title);
-		String known_data_provider = null;
 		for (DATA_PROVIDER dataProvider : DATA_PROVIDER.values()) {
 			if (title.startsWith(dataProvider + ": ")) {
-				known_data_provider = dataProvider.toString();
+				associated_data_provider = dataProvider.toString();
 				break;
 			}
 		}
-		if (known_data_provider == null) {
-			// kein Data-Provider bekannt
-			return content_new;
+		if (associated_data_provider == null) {
+			play.Logger.debug(
+					"Data-Provider konnte aus dem Titel nicht ermittelt werden! PID="
+							+ node.getPid());
+		} else {
+			play.Logger.debug("erkannter Data-Provider=" + associated_data_provider);
 		}
-		play.Logger.debug("erkannter Data-Provider=" + known_data_provider);
 
-		/**
-		 * 2. Stelle das LB-Kennzeichen dem neuen Titel ebenfalls voran (dieser
-		 * Schritt kann in Realisationsphase 3 (s.u. beschrieben) wieder entfallen).
-		 */
-		play.Logger.debug("content_old=" + content);
-		Pattern p = Pattern.compile("\\<" + node.getPid()
-				+ "\\> \\<http://purl.org/dc/terms/title\\> \"(.*)\" \\.");
-		Matcher m = p.matcher(content);
-		content_new = m.replaceAll(
-				"<" + node.getPid() + "> <http://purl.org/dc/terms/title> \""
-						+ known_data_provider + ": $1\" .");
-		play.Logger.debug("content_new=" + content_new);
-
-		/**
-		 * 3. (Realisationsphase 3) Das LB-Kennzeichen (allg.: Data-Provider) wird
-		 * als separates Feld im toscience-Datenstrom hinterlegt. => ToDo. Es ist
-		 * noch nicht geklärt, in welchem RDF-Feld der Data-Provider hinterlegt
-		 * werden soll. Um das neue Feld auch anzeigen zu können, muss es auch in
-		 * ein view-Template (catalog) übernommen werden. Der Crawl-Report muss
-		 * entsprechend geändert werden, um das neue Feld zu lesen (bisher wird es
-		 * aus dem Titel ermittelt). Außerdem wäre es schön, wenn das neue Feld auch
-		 * in der Trefferübersicht erscheint.
-		 */
-
-		return content_new;
+		return associated_data_provider;
 	}
 
 }

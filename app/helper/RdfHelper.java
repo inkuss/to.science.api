@@ -48,15 +48,21 @@ public class RdfHelper {
 		try {
 
 			if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
+				/*
+				 * parallelEdition - nach der Eingabe einer AlmaMmsId / HTNr in der
+				 * Eingabemaske für den Katalogdatenimport wird der content von diesem
+				 * Format sein. Die eigentlichen Metadaten von lobid müssen dann noch
+				 * gezogen werden (s.u.)
+				 */
 				String lobidUri = RdfUtils.findRdfObjects(n.getPid(),
 						archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
 						.get(0);
 				String alephid =
 						lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
 				alephid = alephid.replaceAll("#.*", "");
-				content = Modify.getLobid2DataAsNtripleString(n, alephid);
+				String content_new = Modify.getLobid2DataAsNtripleString(n, alephid);
 				// updateMetadata2(node, content);
-				rewriteContent = new Modify().rewriteContent(content, n.getPid());
+				rewriteContent = new Modify().rewriteContent(content_new, n.getPid());
 				play.Logger.debug("rewriteContent=" + rewriteContent);
 
 			} else {

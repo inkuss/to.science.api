@@ -135,7 +135,7 @@ public class MyController extends Controller {
 		response().setContentType("application/json");
 	}
 
-	protected static Node readNodeOrNull(String pid) {
+	public static Node readNodeOrNull(String pid) {
 		try {
 			return read.readNode(pid);
 		} catch (Exception e) {

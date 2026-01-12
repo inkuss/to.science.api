@@ -473,10 +473,8 @@ public class Resource extends MyController {
 
 				play.Logger.debug("toscienceJson will be mapped");
 
-				String content =
-						Utils.preserveDataProvider(readNode, request().body().asText());
-				Map<String, Object> rdf =
-						RdfHelper.getRdfAsMap(readNode, RDFFormat.NTRIPLES, content);
+				Map<String, Object> rdf = RdfHelper.getRdfAsMap(readNode,
+						RDFFormat.NTRIPLES, request().body().asText());
 				allMetadata = new JSONObject(new JSONObject(rdf).toString());
 				tosNew = TosHelper.getToPersistTosMd(allMetadata.toString(), pid);
 				tosToPersist = TosHelper.getPrefLabelsResolved(new JSONObject(tosNew));
@@ -512,7 +510,8 @@ public class Resource extends MyController {
 				/**
 				 * 3. METADATA2
 				 */
-				String result = modify.updateLobidify2AndEnrichMetadata(pid, content);
+				String result = modify.updateLobidify2AndEnrichMetadata(pid,
+						request().body().asText());
 				return JsonMessage(new Message(result));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);

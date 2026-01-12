@@ -65,6 +65,7 @@ import org.slf4j.LoggerFactory;
 
 import helper.HttpArchiveException;
 import models.Link;
+import models.Node;
 import models.RdfResource;
 
 /**
@@ -711,18 +712,39 @@ public class RdfUtils {
 		return subjs;
 	}
 
+	/**
+	 * Diese Methode ersetzt im gesamten Graphen die lobid-URI durch die toscience
+	 * PID. Bei dieser Gelegenheit wird auch gleich der Data-Provider im Titel
+	 * ergänzt (für TOSDEV-32).
+	 * 
+	 * @param lobidUri eine URI der Form http://lobid.org/resources/*
+	 * @param pid eine toscience PID der Form NAMESPACE:NNN
+	 * @param graph der RDF-Graph der Metadaten für dieses Objekt, i.d.R. von
+	 *          lobid geholt
+	 * @return der RDF-Graph mit den durchgeführten Ersetzungen
+	 * 
+	 */
 	public static Collection<Statement> rewriteSubject(String lobidUri,
 			String pid, Collection<Statement> graph) {
+		Node readNode = controllers.MyController.readNodeOrNull(pid);
+		String dataProvider = Utils.getDataProvider(readNode);
 		Collection<Statement> result = new TreeModel();
 		Iterator<Statement> statements = graph.iterator();
 		while (statements.hasNext()) {
 			Statement curStatement = statements.next();
 			String subj = curStatement.getSubject().stringValue();
-			Resource pred = curStatement.getPredicate();
+			String pred = curStatement.getPredicate().stringValue();
 			Value obj = curStatement.getObject();
 			if (subj.equals(lobidUri)) {
-				result.add(valueFactory.createStatement(valueFactory.createIRI(pid),
-						valueFactory.createIRI(pred.stringValue()), obj));
+				if (pred.equals(archive.fedora.Vocabulary.REL_TITLE)
+						&& dataProvider != null) {
+					result.add(valueFactory.createStatement(valueFactory.createIRI(pid),
+							valueFactory.createIRI(pred), valueFactory
+									.createLiteral(dataProvider + ": " + obj.stringValue())));
+				} else {
+					result.add(valueFactory.createStatement(valueFactory.createIRI(pid),
+							valueFactory.createIRI(pred), obj));
+				}
 			} else {
 				result.add(curStatement);
 			}
