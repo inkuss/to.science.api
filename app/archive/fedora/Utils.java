@@ -47,6 +47,7 @@ import static archive.fedora.Vocabulary.REL_LAST_MODIFIED_BY;
 import static archive.fedora.Vocabulary.REL_LEGACY_ID;
 import static archive.fedora.Vocabulary.REL_NAME;
 import static archive.fedora.Vocabulary.REL_PUBLISH_SCHEME;
+import static archive.fedora.FedoraVocabulary.DATA_PROVIDER;
 
 import archive.fedora.AddDatastream;
 import helper.HttpArchiveException;
@@ -61,6 +62,8 @@ import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -76,6 +79,7 @@ import javax.xml.transform.stream.StreamResult;
 import models.Link;
 import models.Node;
 import models.Transformer;
+import views.Title;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
@@ -996,6 +1000,75 @@ public class Utils {
 	void updateMetadataKtblStream(Node node) {
 		updateMetadataStream(archive.fedora.Vocabulary.ktbl, "application/json",
 				"Metadata KTBL in Format JSON", node);
+	}
+
+	/**
+	 * Diese Methode ergänzt den "Data-Provider" (z.B. ein
+	 * Landesbibliothekskürzel) in den neuen Metadaten. Die neuen Metadaten kommen
+	 * i.d.R. direkt von lobid und erhalten den Data-Provider nicht.
+	 * 
+	 * @author I. Kuss für TOSDEV-32
+	 * @param node der Node so wie er vor dem Update ist, also mit alten Metadaten
+	 *          bzw. alten Titel.
+	 * @param content der neue Inhalt der Metadaten, durch den ersetzt werden
+	 *          soll. Direkt von lobid, also ohne Data-Provider.
+	 * @return der neue Inhalt der Metadaten mit Data-Provider(-Kürzel).
+	 */
+	public static String preserveDataProvider(Node node, String content) {
+		String content_new = content;
+		/**
+		 * In der ersten Realisationsphase wird Data-Provider aus dem manuell
+		 * erfassten, tenporären Titel ermittelt. Dieses Verfahren soll in einer
+		 * zweiten Realisationsphase dahin gehend geändert werden, dass der
+		 * Data-Provider aus der Drupal-UserId ermittelt wird.
+		 */
+		/**
+		 * 1. das LB-Kennzeichen aus den alten Titel ermitteln.
+		 */
+		String title = Title.getTitle(node.getLd2());
+		if (title.isEmpty()) {
+			// kein Data-Provider bekannt
+			return content_new;
+		}
+		play.Logger.debug("alter Titel=" + title);
+		String known_data_provider = null;
+		for (DATA_PROVIDER dataProvider : DATA_PROVIDER.values()) {
+			if (title.startsWith(dataProvider + ": ")) {
+				known_data_provider = dataProvider.toString();
+				break;
+			}
+		}
+		if (known_data_provider == null) {
+			// kein Data-Provider bekannt
+			return content_new;
+		}
+		play.Logger.debug("erkannter Data-Provider=" + known_data_provider);
+
+		/**
+		 * 2. Stelle das LB-Kennzeichen dem neuen Titel ebenfalls voran (dieser
+		 * Schritt kann in Realisationsphase 3 (s.u. beschrieben) wieder entfallen).
+		 */
+		play.Logger.debug("content_old=" + content);
+		Pattern p = Pattern.compile("\\<" + node.getPid()
+				+ "\\> \\<http://purl.org/dc/terms/title\\> \"(.*)\" \\.");
+		Matcher m = p.matcher(content);
+		content_new = m.replaceAll(
+				"<" + node.getPid() + "> <http://purl.org/dc/terms/title> \""
+						+ known_data_provider + ": $1\" .");
+		play.Logger.debug("content_new=" + content_new);
+
+		/**
+		 * 3. (Realisationsphase 3) Das LB-Kennzeichen (allg.: Data-Provider) wird
+		 * als separates Feld im toscience-Datenstrom hinterlegt. => ToDo. Es ist
+		 * noch nicht geklärt, in welchem RDF-Feld der Data-Provider hinterlegt
+		 * werden soll. Um das neue Feld auch anzeigen zu können, muss es auch in
+		 * ein view-Template (catalog) übernommen werden. Der Crawl-Report muss
+		 * entsprechend geändert werden, um das neue Feld zu lesen (bisher wird es
+		 * aus dem Titel ermittelt). Außerdem wäre es schön, wenn das neue Feld auch
+		 * in der Trefferübersicht erscheint.
+		 */
+
+		return content_new;
 	}
 
 }

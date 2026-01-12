@@ -58,6 +58,7 @@ import actions.BulkAction;
 import actions.Enrich;
 import actions.Read;
 import archive.fedora.RdfUtils;
+import archive.fedora.Utils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
 import helper.KTBLMapperHelper;
@@ -472,31 +473,8 @@ public class Resource extends MyController {
 
 				play.Logger.debug("toscienceJson will be mapped");
 
-				/**
-				 * Für TOSDEV-32: 1. den noch vorhandenen alten Titel aus dem noch
-				 * unmodifizierten Node lesen.
-				 */
-				String title = Title.getTitle(readNode.getLd2());
-				play.Logger.debug("update Metadata Titel=" + title);
-				/**
-				 * 2. das LB-Kennzeichen aus dem alten Titel extrahieren => ToDo
-				 */
-				/**
-				 * Falls der alte Titel mit einem LB-Kennzeichen beginnt, stelle dieses
-				 * dem neuen Titel ebenfalls voran. => Wirklich ? Besser über eine
-				 * view-Template machen, auch in die Trefferübersicht übernehmen
-				 */
-				/**
-				 * 3. Das LB-Kennzeichen wir als separates Feld im toscience-Datenstrom
-				 * hinterlegt.
-				 */
-				String content = request().body().asText();
-				/**
-				 * hier wird ein RDF-Tripel der Form
-				 * "<edoweb:871> <http://purl.org/dc/terms/title> \"MS: Marxismus heute\" ."
-				 * an den content abgefügt, jedoch für ein Element "dataProvider" mit
-				 * object=LB-Kennzeichen.
-				 */
+				String content =
+						Utils.preserveDataProvider(readNode, request().body().asText());
 				Map<String, Object> rdf =
 						RdfHelper.getRdfAsMap(readNode, RDFFormat.NTRIPLES, content);
 				allMetadata = new JSONObject(new JSONObject(rdf).toString());

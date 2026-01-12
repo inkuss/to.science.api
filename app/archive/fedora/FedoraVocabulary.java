@@ -236,6 +236,17 @@ public abstract class FedoraVocabulary {
 	public static final String SDEP_CONTENTMODEL =
 			"fedora-system:ServiceDeployment-3.0";
 
+	/**
+	 * Erlaubte Kürzel für "Data-Provider". Das können z.B. Landesbibliotheken
+	 * sein.
+	 * 
+	 * @author I. Kuss für TODSEV-32
+	 */
+	@SuppressWarnings("javadoc")
+	public static enum DATA_PROVIDER {
+		BN, DUS, MS
+	}
+
 	/*
 	 * RISearch Vocabulary
 	 */
