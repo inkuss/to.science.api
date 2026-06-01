@@ -154,7 +154,7 @@ public class Webhooks extends MyController {
 			moveArchive.setLastCrawlId(lastCrawlId);
 			moveArchive.setDatetime(datetime);
 			moveArchive.setDaemon(false);
-			moveArchive.run();
+			moveArchive.start();
 
 			return ok();
 		});
