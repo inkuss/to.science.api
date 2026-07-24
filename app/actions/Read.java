@@ -758,6 +758,7 @@ public class Read extends RegalAction {
 
 	/**
 	 * Diese Methode holt einen Baum von einem Node und gibt ihn aus.
+	 * 
 	 * @author Ingolf Kuss
 	 * @date 2026-06-26
 	 * @param node the pid of the object
@@ -916,6 +917,11 @@ public class Read extends RegalAction {
 							WebgatherUtils.humanReadableDuration(Duration.ofSeconds(
 									Long.parseLong(crawlConfig.getString("crawlExecSeconds")))));
 					entries.put("crawlStarted", crawlConfig.getString("started"));
+				} else if (conf.getCrawlerSelection()
+						.equals(Gatherconf.CrawlerSelection.wpull)) {
+					WpullCrawl wpullCrawl = new WpullCrawl(node, conf);
+					entries.put("crawlFileSize", WebgatherUtils.humanReadableByteCount(
+							Long.parseLong(wpullCrawl.getCrawlFileSize())));
 				}
 			} else if ("webpage".equals(node.getContentType())) {
 				if (conf.getCrawlerSelection()

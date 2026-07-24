@@ -410,6 +410,26 @@ public class WpullCrawl extends CrawlerModel {
 	}
 
 	/**
+	 * Ermittelt die Dateigröße einer fertigen Webarchivdatei für wpull Crawls.
+	 * Diese ist erst nach Beendigung eines Crawls verfügbar. Falls mehrere
+	 * Archivdateien zu diesem Crawl gehören, werden dessen Größen addiert.
+	 * 
+	 * @return a human readable Crawl File Size of a finished crawl
+	 */
+	public String getCrawlFileSize() {
+		File outDir = new File(getConf().getLocalDir());
+
+		/**
+		 * cd nach outDir und dort "du --bytes -c *.warc.gz" absetzen. Davon die
+		 * letzte Zeile auswerten; die erste Zahl (Integer) ist das Ergebnis in
+		 * Byte.
+		 */
+		/* hier weiter für TOS-1377 */
+
+		return "";
+	}
+
+	/**
 	 * Ermittelt, ob ein Crawl nichts eingesammelt hat. Das wird anhand einer
 	 * Meldung im Logfile ermittelt.
 	 * 
