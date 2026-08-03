@@ -34,6 +34,8 @@ import java.util.StringJoiner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.lang.ArrayUtils;
+
 import com.ibm.icu.text.StringCharacterIterator;
 
 import actions.Create;
@@ -385,7 +387,9 @@ public class WebgatherUtils {
 	 * @return the output of a shell command (String value)
 	 */
 	public static String runCommandForOutput(String[] execArr, File localDir) {
-		ProcessBuilder pb = new ProcessBuilder(execArr);
+		String[] useBash = { "bash", "-c" };
+		ProcessBuilder pb =
+				new ProcessBuilder((String[]) ArrayUtils.addAll(useBash, execArr));
 		assert localDir.isDirectory();
 		pb.directory(localDir);
 		pb.redirectErrorStream(true);
