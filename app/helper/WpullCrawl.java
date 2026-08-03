@@ -428,7 +428,8 @@ public class WpullCrawl extends CrawlerModel {
 		 */
 		/* hier weiter für TOS-1377 */
 		StringBuilder sb = new StringBuilder();
-		sb.append("du --bytes -c *.warc.gz");
+		sb.append("ls -l *.warc.gz");
+		// sb.append("du --bytes -c *.warc.gz");
 		WebgatherLogger.debug("Executing shell command: " + sb.toString());
 		String[] execArr = sb.toString().split(" ");
 		try {
@@ -437,6 +438,7 @@ public class WpullCrawl extends CrawlerModel {
 			WebgatherLogger.error(e.getMessage());
 			WebgatherLogger.warn("crawl file size in outDir " + outDir.toString()
 					+ " can not be determined!");
+			return "0";
 		}
 		WebgatherLogger.debug("Shell command outputs: " + result);
 		return result;

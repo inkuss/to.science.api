@@ -402,8 +402,8 @@ public class WebgatherUtils {
 			proc.waitFor();
 			proc.destroy();
 		} catch (Exception e) {
-			WebgatherLogger.error(e.getMessage());
 			WebgatherLogger.warn("Cannot execute or evaluate shell command!");
+			throw new RuntimeException(e);
 		}
 		return result;
 	}
