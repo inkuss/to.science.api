@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.IDN;
 import java.net.URI;
 import java.net.URL;
@@ -29,6 +30,7 @@ import java.text.CharacterIterator;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.StringJoiner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -366,6 +368,44 @@ public class WebgatherUtils {
 	public static String humanReadableDuration(Duration duration) {
 		return duration.toString().substring(2).replaceAll("(\\d[HMS])(?!$)", "$1 ")
 				.toLowerCase();
+	}
+
+	/**
+	 * Diese Methode führt ein Shell-Kommando aus und gibt das Ergebnis als
+	 * Zeichenkette zurück. Quelle:
+	 * https://stackoverflow.com/questions/16714127/how-to-redirect-processbuilders-output-to-a-string
+	 * 
+	 * @author: Ingolf Kuss
+	 * @date 2026-08-03
+	 * 
+	 * @param execArr ein Array von String = das Shell-Kommano ohne Leerzeichen:
+	 *          Leerzeichen sind Trenner des Arrays.
+	 * @param localDir das lokale Verzeichnis, in dem das Shell-Kommando
+	 *          ausgeführt werden soll.
+	 * @return the output of a shell command (String value)
+	 */
+	public static String runCommandForOutput(String[] execArr, File localDir) {
+		ProcessBuilder pb = new ProcessBuilder(execArr);
+		assert localDir.isDirectory();
+		pb.directory(localDir);
+		pb.redirectErrorStream(true);
+		// pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile));
+		Process proc;
+		String result = "";
+		try {
+			proc = pb.start();
+			final BufferedReader reader =
+					new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			StringJoiner sj = new StringJoiner(System.getProperty("line.separator"));
+			reader.lines().iterator().forEachRemaining(sj::add);
+			result = sj.toString();
+			proc.waitFor();
+			proc.destroy();
+		} catch (Exception e) {
+			WebgatherLogger.error(e.getMessage());
+			WebgatherLogger.warn("Cannot execute or evaluate shell command!");
+		}
+		return result;
 	}
 
 }

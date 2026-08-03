@@ -417,7 +417,9 @@ public class WpullCrawl extends CrawlerModel {
 	 * @return a human readable Crawl File Size of a finished crawl
 	 */
 	public String getCrawlFileSize() {
+		String result = "";
 		File outDir = new File(getConf().getLocalDir());
+		WebgatherLogger.debug("getCrawlSize: outDir: " + outDir.toString());
 
 		/**
 		 * cd nach outDir und dort "du --bytes -c *.warc.gz" absetzen. Davon die
@@ -425,36 +427,19 @@ public class WpullCrawl extends CrawlerModel {
 		 * Byte.
 		 */
 		/* hier weiter für TOS-1377 */
+		StringBuilder sb = new StringBuilder();
+		sb.append("du --bytes -c *.warc.gz");
+		WebgatherLogger.debug("Executing shell command: " + sb.toString());
+		String[] execArr = sb.toString().split(" ");
 		try {
-			StringBuilder sb = new StringBuilder();
-			sb.append("du --bytes -c *.warc.gz");
-			String[] execArr = sb.toString().split(" ");
-			ProcessBuilder pb = new ProcessBuilder(execArr);
-			assert outDir.isDirectory();
-			pb.directory(outDir);
-			pb.redirectErrorStream(true);
-			// pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile));
-			Process proc = pb.start();
-			try (InputStream inputStream = proc.getInputStream()) {
-				String result = new String(inputStream.readAllBytes());
-
-				// assert pb.redirectInput() == ProcessBuilder.Redirect.PIPE;
-				// assert pb.redirectOutput().file() == logFile;
-
-				WebgatherLogger.debug("getCrawlSize: outDir: " + outDir.toString());
-				WebgatherLogger
-						.debug("getCrawlSize: du --bytes -c *.warc.gz: " + result);
-			} catch (Exception e) {
-				WebgatherLogger.warn("Cannot read input stream from process builder!");
-			}
-			proc.destroy();
-		} catch (IOException ioe) {
-			WebgatherLogger.error(ioe.getMessage());
+			result = WebgatherUtils.runCommandForOutput(execArr, outDir);
+		} catch (Exception e) {
+			WebgatherLogger.error(e.getMessage());
 			WebgatherLogger.warn("crawl file size in outDir " + outDir.toString()
 					+ " can not be determined!");
 		}
-
-		return "";
+		WebgatherLogger.debug("Shell command outputs: " + result);
+		return result;
 	}
 
 	/**
