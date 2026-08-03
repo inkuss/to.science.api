@@ -430,9 +430,9 @@ public class WpullCrawl extends CrawlerModel {
 		StringBuilder sb = new StringBuilder();
 		sb.append("du --bytes -c *.warc.gz");
 		WebgatherLogger.debug("Executing shell command: " + sb.toString());
-		String[] execArr = sb.toString().split(" ");
+		String[] execArr = { sb.toString() };
 		try {
-			result = WebgatherUtils.runCommandForOutput(execArr, outDir);
+			result = WebgatherUtils.runShellCommandForOutput(execArr, outDir);
 		} catch (Exception e) {
 			WebgatherLogger.error(e.getMessage());
 			WebgatherLogger.warn("crawl file size in outDir " + outDir.toString()

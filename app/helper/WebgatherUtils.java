@@ -386,7 +386,8 @@ public class WebgatherUtils {
 	 *          ausgeführt werden soll.
 	 * @return the output of a shell command (String value)
 	 */
-	public static String runCommandForOutput(String[] execArr, File localDir) {
+	public static String runShellCommandForOutput(String[] execArr,
+			File localDir) {
 		String[] useBash = { "bash", "-c" };
 		ProcessBuilder pb =
 				new ProcessBuilder((String[]) ArrayUtils.addAll(useBash, execArr));
