@@ -425,6 +425,34 @@ public class WpullCrawl extends CrawlerModel {
 		 * Byte.
 		 */
 		/* hier weiter für TOS-1377 */
+		try {
+			StringBuilder sb = new StringBuilder();
+			sb.append("du --bytes -c *.warc.gz");
+			String[] execArr = sb.toString().split(" ");
+			ProcessBuilder pb = new ProcessBuilder(execArr);
+			assert outDir.isDirectory();
+			pb.directory(outDir);
+			pb.redirectErrorStream(true);
+			// pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile));
+			Process proc = pb.start();
+			try (InputStream inputStream = proc.getInputStream()) {
+				String result = new String(inputStream.readAllBytes());
+
+				// assert pb.redirectInput() == ProcessBuilder.Redirect.PIPE;
+				// assert pb.redirectOutput().file() == logFile;
+
+				WebgatherLogger.debug("getCrawlSize: outDir: " + outDir.toString());
+				WebgatherLogger
+						.debug("getCrawlSize: du --bytes -c *.warc.gz: " + result);
+			} catch (Exception e) {
+				WebgatherLogger.warn("Cannot read input stream from process builder!");
+			}
+			proc.destroy();
+		} catch (IOException ioe) {
+			WebgatherLogger.error(ioe.getMessage());
+			WebgatherLogger.warn("crawl file size in outDir " + outDir.toString()
+					+ " can not be determined!");
+		}
 
 		return "";
 	}
