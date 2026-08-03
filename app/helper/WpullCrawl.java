@@ -414,7 +414,7 @@ public class WpullCrawl extends CrawlerModel {
 	 * Diese ist erst nach Beendigung eines Crawls verfügbar. Falls mehrere
 	 * Archivdateien zu diesem Crawl gehören, werden dessen Größen addiert.
 	 * 
-	 * @return a human readable Crawl File Size of a finished crawl
+	 * @return a the Crawl File Size in Bytes.
 	 */
 	public String getCrawlFileSize() {
 		String result = "";
@@ -433,6 +433,7 @@ public class WpullCrawl extends CrawlerModel {
 		String[] execArr = { sb.toString() };
 		try {
 			result = WebgatherUtils.runShellCommandForOutput(execArr, outDir);
+			/* hier nur die letzte Zeile holen */
 		} catch (Exception e) {
 			WebgatherLogger.error(e.getMessage());
 			WebgatherLogger.warn("crawl file size in outDir " + outDir.toString()
@@ -440,6 +441,7 @@ public class WpullCrawl extends CrawlerModel {
 			return "0";
 		}
 		WebgatherLogger.debug("Shell command outputs: " + result);
+		/* die letzte Zeile ausparsen: ^Integer .* , nur den Integer zurück geben */
 		return result;
 	}
 

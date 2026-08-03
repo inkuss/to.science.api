@@ -380,8 +380,8 @@ public class WebgatherUtils {
 	 * @author: Ingolf Kuss
 	 * @date 2026-08-03
 	 * 
-	 * @param execArr ein Array von String = das Shell-Kommano ohne Leerzeichen:
-	 *          Leerzeichen sind Trenner des Arrays.
+	 * @param execArr ein Array von String = das Shell-Kommando (ggfs. auf mehrere
+	 *          Strings aufgeteilt)
 	 * @param localDir das lokale Verzeichnis, in dem das Shell-Kommando
 	 *          ausgeführt werden soll.
 	 * @return the output of a shell command (String value)
