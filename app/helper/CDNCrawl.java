@@ -117,7 +117,12 @@ public class CDNCrawl extends Thread {
 			if (this.cdxFileNew != null) {
 				executeCommand = executeCommand.concat(" " + cdxFileNew.getName());
 			}
+
 			String[] execArr = executeCommand.split(" ");
+			// unmask spaces in exec command
+			for (int i = 0; i < execArr.length; i++) {
+				execArr[i] = execArr[i].replaceAll("%20", " ");
+			}
 			executeCommand = executeCommand.replaceAll("%20", " ");
 			WebgatherLogger.info("Executing command " + executeCommand);
 			WebgatherLogger

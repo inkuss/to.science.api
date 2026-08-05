@@ -553,8 +553,8 @@ public class BtrixWebclient extends CrawlerModel {
 			config.put("useSitemap", true);
 			// KS Anpassung an LAV:
 			config.put("behaviors", "autoscroll,autoclick,autoplay,autofetch");
-			config.put("userAgent",
-					Gatherconf.agentTable.get(conf.getAgentIdSelection()));
+			config.put("userAgent", Gatherconf.agentTable
+					.get(conf.getAgentIdSelection()).replaceAll("%20", " "));
 			data.put("config", config);
 		} catch (JSONException e) {
 			setMsg("Crawlerconf JSON (JsonBody) für PID " + getNode().getPid()
