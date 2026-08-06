@@ -343,13 +343,33 @@ public class WpullCrawl extends CrawlerModel {
 	}
 
 	/**
+	 * Ermittelt Crawler Exit Status für diesen Crawl. Der Exit-Status ist eine
+	 * ganze Zahl. Der Exit-Status ist erst nach Beendigung eines Crawls
+	 * verfügbar.
+	 * 
+	 * @return Crawler Exit Status dieses wpull-Crawls
+	 */
+	public int getCrawlExitStatus() {
+
+		File logfile = new File(getConf().getLocalDir() + "/crawl.log");
+		if (!logfile.exists()) {
+			WebgatherLogger
+					.warn("Crawl-Log für PID " + getNode().getPid() + " nicht gefunden.");
+			return -2;
+		}
+		CrawlLog crawlLog = new CrawlLog(logfile);
+		crawlLog.parse();
+		return crawlLog.getExitStatus();
+	}
+
+	/**
 	 * Ermittelt Crawler Exit Status des letzten Crawls. Der Exit-Status ist eine
 	 * ganze Zahl. Der Exit-Status ist erst nach Beendigung eines Crawls
 	 * verfügbar.
 	 * 
 	 * @return Crawler Exit Status des letzten wpull-Crawls
 	 */
-	public int getCrawlExitStatus() {
+	public int getLatestCrawlExitStatus() {
 		File logfile = findLatestLogFile();
 		if (logfile == null || !logfile.exists()) {
 			WebgatherLogger.warn("Letztes Crawl-Log für PID " + getNode().getPid()

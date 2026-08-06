@@ -920,6 +920,7 @@ public class Read extends RegalAction {
 				} else if (conf.getCrawlerSelection()
 						.equals(Gatherconf.CrawlerSelection.wpull)) {
 					WpullCrawl wpullCrawl = new WpullCrawl(node, conf);
+					entries.put("crawlExitStatus", wpullCrawl.getCrawlExitStatus());
 					entries.put("crawlFileSize", WebgatherUtils.humanReadableByteCount(
 							Long.parseLong(wpullCrawl.getCrawlFileSize())));
 				}
@@ -936,8 +937,8 @@ public class Read extends RegalAction {
 					entries.put("crawlControllerState",
 							wpullCrawl.getCrawlControllerState());
 					entries.put("crawlExitStatus",
-							wpullCrawl.getCrawlExitStatus() < 0 ? ""
-									: wpullCrawl.getCrawlExitStatus());
+							wpullCrawl.getLatestCrawlExitStatus() < 0 ? ""
+									: wpullCrawl.getLatestCrawlExitStatus());
 				} else if (conf.getCrawlerSelection()
 						.equals(Gatherconf.CrawlerSelection.btrix)) {
 					if (conf.getBtrixWorkflowId() != null) {
