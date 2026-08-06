@@ -380,14 +380,15 @@ public class WebgatherUtils {
 	 * @author: Ingolf Kuss
 	 * @date 2026-08-03
 	 * 
-	 * @param execArr ein Array von String = das Shell-Kommando (ggfs. auf mehrere
-	 *          Strings aufgeteilt)
+	 * @param execArr ein Array von String = das Shell-Kommando (oder mehrere
+	 *          Kommandos als Array)
 	 * @param localDir das lokale Verzeichnis, in dem das Shell-Kommando
 	 *          ausgeführt werden soll.
+	 * @param onlyLastLine (boolean): return only the last line of output
 	 * @return the output of a shell command (String value)
 	 */
-	public static String runShellCommandForOutput(String[] execArr,
-			File localDir) {
+	public static String runShellCommandForOutput(String[] execArr, File localDir,
+			boolean onlyLastLine) {
 		String[] useBash = { "bash", "-c" };
 		ProcessBuilder pb =
 				new ProcessBuilder((String[]) ArrayUtils.addAll(useBash, execArr));
@@ -397,18 +398,25 @@ public class WebgatherUtils {
 		// pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile));
 		Process proc;
 		String result = "";
+		String nextLine = "";
 		try {
 			proc = pb.start();
 			final BufferedReader reader =
 					new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			StringJoiner sj = new StringJoiner(System.getProperty("line.separator"));
-			reader.lines().iterator().forEachRemaining(sj::add);
+			while (reader.lines().iterator().hasNext()) {
+				nextLine = reader.lines().iterator().next();
+				sj.add(nextLine);
+			}
 			result = sj.toString();
 			proc.waitFor();
 			proc.destroy();
 		} catch (Exception e) {
 			WebgatherLogger.warn("Cannot execute or evaluate shell command!");
 			throw new RuntimeException(e);
+		}
+		if (onlyLastLine) {
+			return nextLine;
 		}
 		return result;
 	}

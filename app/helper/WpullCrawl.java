@@ -417,7 +417,7 @@ public class WpullCrawl extends CrawlerModel {
 	 * @return a the Crawl File Size in Bytes.
 	 */
 	public String getCrawlFileSize() {
-		String result = "";
+		String fileSize = "0";
 		File outDir = new File(getConf().getLocalDir());
 		WebgatherLogger.debug("getCrawlSize: outDir: " + outDir.toString());
 
@@ -426,23 +426,33 @@ public class WpullCrawl extends CrawlerModel {
 		 * letzte Zeile auswerten; die erste Zahl (Integer) ist das Ergebnis in
 		 * Byte.
 		 */
-		/* hier weiter für TOS-1377 */
 		StringBuilder sb = new StringBuilder();
 		sb.append("du --bytes -c *.warc.gz");
 		WebgatherLogger.debug("Executing shell command: " + sb.toString());
 		String[] execArr = { sb.toString() };
+		String commandOutput = "";
 		try {
-			result = WebgatherUtils.runShellCommandForOutput(execArr, outDir);
-			/* hier nur die letzte Zeile holen */
+			boolean onlyLastLine = true;
+			commandOutput = WebgatherUtils.runShellCommandForOutput(execArr, outDir,
+					onlyLastLine);
+			WebgatherLogger
+					.debug("Shell command outputs (only last line): " + commandOutput);
+			String regExp = "^([0-9]+) .*";
+			Pattern pattern = Pattern.compile(regExp);
+			Matcher matcher = pattern.matcher(commandOutput);
+			if (!matcher.find()) {
+				throw new RuntimeException("commandOutput " + commandOutput
+						+ " can not be parsed as Integer!");
+			}
+			fileSize = matcher.group(1);
+			WebgatherLogger.debug("Found crawlFileSize in outdir " + outDir.toString()
+					+ ": " + fileSize);
 		} catch (Exception e) {
 			WebgatherLogger.error(e.getMessage());
 			WebgatherLogger.warn("crawl file size in outDir " + outDir.toString()
 					+ " can not be determined!");
-			return "0";
 		}
-		WebgatherLogger.debug("Shell command outputs: " + result);
-		/* die letzte Zeile ausparsen: ^Integer .* , nur den Integer zurück geben */
-		return result;
+		return fileSize;
 	}
 
 	/**
