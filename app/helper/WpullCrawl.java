@@ -417,7 +417,7 @@ public class WpullCrawl extends CrawlerModel {
 	 * @return a the Crawl File Size in Bytes.
 	 */
 	public String getCrawlFileSize() {
-		String fileSize = "0";
+		String fileSize = "";
 		File outDir = new File(getConf().getLocalDir());
 		WebgatherLogger.debug("getCrawlSize: outDir: " + outDir.toString());
 
@@ -437,7 +437,7 @@ public class WpullCrawl extends CrawlerModel {
 					onlyLastLine);
 			WebgatherLogger
 					.debug("Shell command outputs (only last line): " + commandOutput);
-			String regExp = "^([0-9]+) .*";
+			String regExp = "^([0-9]+)[ \t]+.*$";
 			Pattern pattern = Pattern.compile(regExp);
 			Matcher matcher = pattern.matcher(commandOutput);
 			if (!matcher.find()) {
