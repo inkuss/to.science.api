@@ -442,16 +442,18 @@ public class WpullCrawl extends CrawlerModel {
 			String line = null;
 			while ((line = buf.readLine()) != null) {
 				Matcher matcher = pattern.matcher(line);
+				WebgatherLogger.info("log line: " + line);
 				if (matcher.find()) {
+					WebgatherLogger.info("Crawl is empty");
 					isEmpty = true;
 					break;
 				}
 			}
 			if (isEmpty == false) {
+				WebgatherLogger.info("Crawl was not empty");
+			} else {
 				WebgatherLogger
 						.info("Found line \"^INFO Downloaded: 0 files, 0.0 B.\"");
-			} else {
-				WebgatherLogger.info("Crawl was not empty");
 			}
 		} catch (IOException e) {
 			WebgatherLogger.warn("Logfile " + logfile.getAbsolutePath()
