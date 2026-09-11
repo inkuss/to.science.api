@@ -265,6 +265,7 @@ public class WpullThread extends Thread {
 				 * TOS-1326
 				 */
 				if (wpullCrawl.isWpullCrawlEmpty()) {
+					WebgatherLogger.info("Crawl was empty. An E-Mail will be send.");
 					title = node.getDublinCoreData().getTitle();
 					msg =
 							"Für die Website " + conf.getName() + ", Titel: " + title + "\n";

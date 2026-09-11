@@ -423,6 +423,7 @@ public class WpullCrawl extends CrawlerModel {
 	 */
 	public boolean isWpullCrawlEmpty() {
 		File logfile = findLatestLogFile();
+		WebgatherLogger.info("logfile: " + logfile.getPath());
 		/**
 		 * Kein Crawl-Verzeichnis mit crawl.log vorhanden => wird wie "leer"
 		 * behandelt
@@ -445,6 +446,12 @@ public class WpullCrawl extends CrawlerModel {
 					isEmpty = true;
 					break;
 				}
+			}
+			if (isEmpty == false) {
+				WebgatherLogger
+						.info("Found line \"^INFO Downloaded: 0 files, 0.0 B.\"");
+			} else {
+				WebgatherLogger.info("Crawl was not empty");
 			}
 		} catch (IOException e) {
 			WebgatherLogger.warn("Logfile " + logfile.getAbsolutePath()
