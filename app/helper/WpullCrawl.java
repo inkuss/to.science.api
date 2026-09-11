@@ -438,6 +438,7 @@ public class WpullCrawl extends CrawlerModel {
 		Pattern pattern = Pattern.compile(regExp);
 		boolean isEmpty = false;
 		try {
+			Thread.sleep(1000);
 			buf = new BufferedReader(new FileReader(logfile));
 			String line = null;
 			while ((line = buf.readLine()) != null) {
@@ -455,7 +456,7 @@ public class WpullCrawl extends CrawlerModel {
 				WebgatherLogger
 						.info("Found line \"^INFO Downloaded: 0 files, 0.0 B.\"");
 			}
-		} catch (IOException e) {
+		} catch (IOException | InterruptedException e) {
 			WebgatherLogger.warn("Logfile " + logfile.getAbsolutePath()
 					+ " can not be parsed or read. Assuming empty.", e.toString());
 			isEmpty = true;
