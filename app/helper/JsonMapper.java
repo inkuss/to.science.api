@@ -36,15 +36,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import actions.Modify;
 import actions.Read;
@@ -67,6 +66,8 @@ public class JsonMapper {
 
 	private static final String PREF_LABEL = Globals.profile.getLabelKey();
 	private static final String ID2 = Globals.profile.getIdAlias();
+	private static final ConcurrentMap<String, String> jsonNames =
+			new ConcurrentHashMap<>();
 	/**
 	 * Here are some short names that must be defined in the context document that
 	 * is loaded at Globals.context.
@@ -147,7 +148,7 @@ public class JsonMapper {
 	JsonConverter jsonConverter = null;
 
 	/**
-	 * Ein Konstruktor für diese Klasse
+	 * Ein Konstruktor fuer diese Klasse
 	 */
 	public JsonMapper() {
 		play.Logger.info("Creating new instance of Class JsonMapper");
@@ -155,7 +156,7 @@ public class JsonMapper {
 	}
 
 	/**
-	 * Ein Konstruktor für diese Klasse, falls Metadata2-Datenstrom schon
+	 * Ein Konstruktor fuer diese Klasse, falls Metadata2-Datenstrom schon
 	 * vorhanden ist.
 	 * 
 	 * @param n the node will be mapped to json ld in accordance to the profile
@@ -373,8 +374,7 @@ public class JsonMapper {
 				rdf.put(rdftype, Arrays.asList(new String[] { "File" }));
 			}
 
-			Collection<Map<String, Object>> t =
-					getType(new ObjectMapper().valueToTree(rdf));
+			Collection<Map<String, Object>> t = getType(rdf);
 			if (t != null && t.size() != 0)
 				rdf.put(rdftype, t);
 
@@ -554,35 +554,19 @@ public class JsonMapper {
 
 	}
 
-	private static void addParts(Map<String, Object> rdf) {
+	private static void addParts(Map<String, Object> rdf,
+			Collection<Link> parts) {
+		if (parts == null || parts.isEmpty())
+			return;
 		Read read = new Read();
-		List<Map<String, Object>> children = new ArrayList<>();
-		Object myObj = rdf.get("hasPart");
-		if (myObj instanceof java.util.HashSet) {
-			HashSet<Map<String, Object>> all =
-					(HashSet<Map<String, Object>>) rdf.get("hasPart");
-			if (all == null)
-				return;
-			Iterator<Map<String, Object>> fit = all.iterator();
-			while (fit.hasNext()) {
-				Map<String, Object> m = fit.next();
-				String id = (String) m.get(ID2);
-				Node cn = read.internalReadNode(id);
-				if (!"D".equals(cn.getState())) {
-					children.add(new JsonMapper(cn).getLd2WithoutContext());
-				}
-			}
-		} else if (myObj instanceof java.util.List) {
-			List<Map<String, Object>> all =
-					(List<Map<String, Object>>) rdf.get("hasPart");
-			if (all == null)
-				return;
-			for (Map<String, Object> part : all) {
-				String id = (String) part.get(ID2);
-				Node cn = read.internalReadNode(id);
-				if (!"D".equals(cn.getState())) {
-					children.add(new JsonMapper(cn).getLd2WithoutContext());
-				}
+		List<Map<String, Object>> children = new ArrayList<>(parts.size());
+		for (Link part : parts) {
+			String id = part.getObject();
+			if (id == null)
+				continue;
+			Node cn = read.internalReadNode(id);
+			if (cn != null && !"D".equals(cn.getState())) {
+				children.add(new JsonMapper(cn).getLd2WithoutContext());
 			}
 		}
 		if (!children.isEmpty()) {
@@ -685,8 +669,7 @@ public class JsonMapper {
 			resolvedObject.put(PREF_LABEL, value);
 		}
 		if (jsonName != null && rdf.containsKey(jsonName)) {
-			Collection<Object> list =
-					(Collection<Object>) rdf.get(getJsonName(l.getPredicate()));
+			Collection<Object> list = (Collection<Object>) rdf.get(jsonName);
 			if (resolvedObject == null) {
 				if (l.isLiteral()) {
 					list.add(l.getObject());
@@ -713,7 +696,7 @@ public class JsonMapper {
 			} else {
 				list.add(resolvedObject);
 			}
-			rdf.put(getJsonName(l.getPredicate()), list);
+			rdf.put(jsonName, list);
 		}
 	}
 
@@ -871,7 +854,18 @@ public class JsonMapper {
 	}
 
 	private String getJsonName(String uri) {
-		String result = profile.getEtikett(uri).getName();
+		if (uri == null)
+			return null;
+
+		String result = jsonNames.get(uri);
+		if (result != null)
+			return result;
+
+		try {
+			result = profile.getEtikett(uri).getName();
+		} catch (RuntimeException e) {
+			result = uri;
+		}
 
 		if (result == null) {
 			play.Logger
@@ -879,12 +873,13 @@ public class JsonMapper {
 			result = uri;
 		}
 
+		jsonNames.put(uri, result);
 		return result;
 	}
 
 	public Map<String, Object> getLd2WithParts() {
-		Map<String, Object> rdf = getLd2();
-		addParts(rdf);
+		Map<String, Object> rdf = getLd2(false);
+		addParts(rdf, node.getPartsSorted());
 		return rdf;
 	}
 
@@ -895,6 +890,10 @@ public class JsonMapper {
 	 * @return
 	 */
 	public Map<String, Object> getLd2() {
+		return getLd2(true);
+	}
+
+	private Map<String, Object> getLd2(boolean addPartLinks) {
 		Collection<Link> ls = node.getRelsExt();
 		Map<String, Object> m = getDescriptiveMetadata2();
 		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
@@ -914,7 +913,8 @@ public class JsonMapper {
 				continue;
 			addLinkToJsonMap(rdf, l);
 		}
-		addPartsToJsonMap(rdf);
+		if (addPartLinks)
+			addPartsToJsonMap(rdf);
 		rdf.remove("isNodeType");
 
 		rdf.put(contentType, node.getContentType());
@@ -988,9 +988,7 @@ public class JsonMapper {
 			}
 			rdf.put(hasData, hasDataMap);
 		}
-		ObjectMapper mapper = new ObjectMapper();
-
-		String issued = getPublicationMap(mapper.convertValue(rdf, JsonNode.class));
+		String issued = getPublicationMap(rdf);
 
 		if (issued != null) {
 			rdf.put("issued", issued);
@@ -1000,31 +998,31 @@ public class JsonMapper {
 		return rdf;
 	}
 
-	public static String getPublicationMap(JsonNode jsNode) {
+	public static String getPublicationMap(Map<String, Object> rdf) {
 
-		if (jsNode.has("issued") && !jsNode.get("issued").toString().isEmpty()) {
-			String issued = jsNode.get("issued").toString();
-			play.Logger.debug("issued =" + issued);
-			return issued.substring(issued.toString().indexOf("\"") + 1,
-					issued.toString().lastIndexOf("\""));
+		String issuedValue = getFirstValue(rdf.get("issued"));
+		if (issuedValue != null && !issuedValue.isEmpty()) {
+			play.Logger.debug("issued =" + issuedValue);
+			return issuedValue;
+		}
 
-		} else if (jsNode.has("publicationYear")
-				&& !jsNode.get("publicationYear").toString().isEmpty()) {
-			String publicationYear =
-					jsNode.get("publicationYear").toString().substring(2, 6);
+		String publicationYear = getFirstValue(rdf.get("publicationYear"));
+		if (publicationYear != null && !publicationYear.isEmpty()) {
 			play.Logger.debug("publicationYear =" + publicationYear);
 
 			if (new JsonMapperHelper().isDateValid(publicationYear)) {
 				return publicationYear;
 			}
+		}
 
-		} else if (jsNode.has("publication")) {
-			JsonNode publication = jsNode.get("publication");
-			if (publication != null && publication.size() > 0) {
-				for (int i = 0; i < publication.size(); i++) {
-					JsonNode pubItem = publication.get(i);
-					if (pubItem.has("startDate")) {
-						return pubItem.get("startDate").asText();
+		Object publication = rdf.get("publication");
+		if (publication instanceof Collection) {
+			for (Object pubItem : (Collection<?>) publication) {
+				if (pubItem instanceof Map) {
+					String startDate =
+							getFirstValue(((Map<?, ?>) pubItem).get("startDate"));
+					if (startDate != null) {
+						return startDate;
 					}
 				}
 			}
@@ -1033,13 +1031,22 @@ public class JsonMapper {
 
 	}
 
-	private static Collection<Map<String, Object>> getType(final JsonNode rdf) {
+	private static String getFirstValue(Object value) {
+		if (value instanceof Collection) {
+			Iterator<?> it = ((Collection<?>) value).iterator();
+			return it.hasNext() ? getFirstValue(it.next()) : null;
+		}
+		return value == null ? null : value.toString();
+	}
+
+	private static Collection<Map<String, Object>> getType(
+			final Map<String, Object> rdf) {
 		Collection<Map<String, Object>> result = new ArrayList<>();
 
 		// Special case medium is video - override type
-		if (mediumArrayContains(rdf,
+		if (mediumArrayContains(rdf.get("medium"),
 				"http://rdaregistry.info/termList/RDAMediaType/1008")
-				|| mediumArrayContains(rdf,
+				|| mediumArrayContains(rdf.get("medium"),
 						"http://rdvocab.info/termList/RDACarrierType/1050")) {
 			String s = "http://rdaregistry.info/termList/RDAMediaType/1008";
 			Map<String, Object> tmap = new HashMap<>();
@@ -1048,27 +1055,44 @@ public class JsonMapper {
 			result.add(tmap);
 
 		}
-		JsonNode types = rdf.at("/rdftype");
-		types.forEach(t -> {
-			String typeId = t.at("/" + ID2).asText();
-			if (!"http://purl.org/dc/terms/BibliographicResource".equals(typeId)) {
-				Map<String, Object> tmap = new HashMap<>();
-				tmap.put(PREF_LABEL, Globals.profile.getEtikett(typeId).getLabel());
-				tmap.put(ID2, typeId);
-				result.add(tmap);
+		Object types = rdf.get(rdftype);
+		if (types instanceof Collection) {
+			for (Object t : (Collection<?>) types) {
+				addType(result, getIdValue(t));
 			}
-		});
+		} else {
+			addType(result, getIdValue(types));
+		}
 		return result;
 	}
 
-	private static boolean mediumArrayContains(JsonNode rdf, String key) {
-		boolean result = false;
-		JsonNode mediumArray = rdf.at("/medium");
-		for (JsonNode item : mediumArray) {
-			if (key.equals(item.at("/" + ID2).asText("no Value found")))
-				result = true;
+	private static void addType(Collection<Map<String, Object>> result,
+			String typeId) {
+		if (typeId == null || typeId.isEmpty()
+				|| "http://purl.org/dc/terms/BibliographicResource".equals(typeId)) {
+			return;
 		}
-		return result;
+		Map<String, Object> tmap = new HashMap<>();
+		tmap.put(PREF_LABEL, Globals.profile.getEtikett(typeId).getLabel());
+		tmap.put(ID2, typeId);
+		result.add(tmap);
+	}
+
+	private static boolean mediumArrayContains(Object medium, String key) {
+		if (medium instanceof Collection) {
+			for (Object item : (Collection<?>) medium) {
+				if (key.equals(getIdValue(item)))
+					return true;
+			}
+		}
+		return key.equals(getIdValue(medium));
+	}
+
+	private static String getIdValue(Object value) {
+		if (value instanceof Map) {
+			return getFirstValue(((Map<?, ?>) value).get(ID2));
+		}
+		return null;
 	}
 
 }

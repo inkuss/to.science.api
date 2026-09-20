@@ -82,6 +82,8 @@ import com.wordnik.swagger.core.util.JsonUtil;
 @IgnoreSizeOf
 public class Read extends RegalAction {
 
+	private static final int maxPartLabels = 100;
+
 	/**
 	 * @param pid the will be read to the node
 	 * @return a Node containing the data from the repository
@@ -117,8 +119,8 @@ public class Read extends RegalAction {
 
 	/**
 	 * Liefert das zuletzt modifizierte Kind vom Type "contentType". Wie
-	 * getLastModifiedChild, jedoch wir Null zurück gegeben, falls: - der
-	 * Inhaltstyp leer ist, oder - kein Kind von dem gewünschten Inhaltstyp
+	 * getLastModifiedChild, jedoch wir Null zurueck gegeben, falls: - der
+	 * Inhaltstyp leer ist, oder - kein Kind von dem gewuenschten Inhaltstyp
 	 * gefunden wurde. Die Methode getLastModifiedChild liefert dagegen in diesem
 	 * Falle ein Kind irgendeinen Types bzw. den Knoten selber.
 	 * 
@@ -205,11 +207,11 @@ public class Read extends RegalAction {
 
 	/**
 	 * Liefert das zuletzt erzeugte Kind vom Type "contentType". Wie
-	 * getLastlyCreatedChild, jedoch wir Null zurück gegeben, falls: - der
-	 * Inhaltstyp leer ist, oder - kein Kind von dem gewünschten Inhaltstyp
+	 * getLastlyCreatedChild, jedoch wir Null zurueck gegeben, falls: - der
+	 * Inhaltstyp leer ist, oder - kein Kind von dem gewuenschten Inhaltstyp
 	 * gefunden wurde. Die Methode getLastModifiedChild liefert dagegen in diesem
-	 * Falle ein Kind irgendeinen Types bzw. den Knoten selber. Für Ermittlung des
-	 * neuesten Webschnitts im Webgatherer.
+	 * Falle ein Kind irgendeinen Types bzw. den Knoten selber. Fuer Ermittlung
+	 * des neuesten Webschnitts im Webgatherer.
 	 * 
 	 * @author Ingolf Kuss
 	 * @param node Der Knoten, dessen Kinder gesucht werden.
@@ -293,6 +295,8 @@ public class Read extends RegalAction {
 
 	void addLabelsForParts(Node n) {
 		List<Link> rels = n.getRelsExt();
+		if (rels.size() > maxPartLabels)
+			return;
 		for (Link l : rels) {
 			if (HAS_PART.equals(l.getPredicate())
 					|| IS_PART_OF.equals(l.getPredicate())) {
@@ -758,6 +762,7 @@ public class Read extends RegalAction {
 
 	/**
 	 * Diese Methode holt einen Baum von einem Node und gibt ihn aus.
+	 * 
 	 * @author Ingolf Kuss
 	 * @date 2026-06-26
 	 * @param node the pid of the object
@@ -951,8 +956,8 @@ public class Read extends RegalAction {
 					}
 				}
 				/*
-				 * Launch Count als Summe der Launches über alle Crawler ermitteln -
-				 * überschreibt launchCount von Heritrix und Browsertrix
+				 * Launch Count als Summe der Launches ueber alle Crawler ermitteln -
+				 * ueberschreibt launchCount von Heritrix und Browsertrix
 				 */
 				entries.put("launchCount", Webgatherer.getLaunchCount(node));
 				entries.put("nextLaunch", Webgatherer.nextLaunch(node));
