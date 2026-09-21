@@ -1,9 +1,8 @@
 <ehcache>
 	<diskStore path="java.io.tmpdir/regal-api.cache" />
-	<defaultCache maxBytesLocalHeap="2G" eternal="false"
-		timeToIdleSeconds="90000" timeToLiveSeconds="0" maxBytesLocalDisk="10G"
+	<defaultCache maxBytesLocalHeap="128M" eternal="false"
+		timeToIdleSeconds="300" timeToLiveSeconds="900"
 		diskExpiryThreadIntervalSeconds="120" memoryStoreEvictionPolicy="LFU">
-		<persistence strategy="localTempSwap" />
 	</defaultCache>
 	<sizeOfPolicy maxDepth="1000" maxDepthExceededBehavior="abort" />
 </ehcache>
