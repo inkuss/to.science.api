@@ -758,6 +758,7 @@ public class Read extends RegalAction {
 
 	/**
 	 * Diese Methode holt einen Baum von einem Node und gibt ihn aus.
+	 * 
 	 * @author Ingolf Kuss
 	 * @date 2026-06-26
 	 * @param node the pid of the object

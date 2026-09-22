@@ -336,6 +336,7 @@ public class Node implements java.io.Serializable {
 
 	/**
 	 * Setze SeqFile
+	 * 
 	 * @param seqFile The absolutepath to a file that provides ordering
 	 *          information for the object's children
 	 */
@@ -345,6 +346,7 @@ public class Node implements java.io.Serializable {
 
 	/**
 	 * Setze TreeFile
+	 * 
 	 * @param treeFile The absolutepath to a file that provides an html
 	 *          representation of the navigation tree
 	 */
@@ -651,6 +653,7 @@ public class Node implements java.io.Serializable {
 
 	/**
 	 * Hole Seq-Datenstrom (Reihenfolge der Kind-Elemente)
+	 * 
 	 * @return the content of seq data stream in a string
 	 */
 	@JsonIgnore()
@@ -660,6 +663,7 @@ public class Node implements java.io.Serializable {
 
 	/**
 	 * Hole TreeHtml
+	 * 
 	 * @return the content of tree_html data stream in a string
 	 */
 	@JsonIgnore()
@@ -669,6 +673,7 @@ public class Node implements java.io.Serializable {
 
 	/**
 	 * Setze Seq-Datenstrom (Reihenfolge der Kind-Elemente)
+	 * 
 	 * @param seq data stream as string
 	 * @return this
 	 */
@@ -679,6 +684,7 @@ public class Node implements java.io.Serializable {
 
 	/**
 	 * Setze TreeHtml
+	 * 
 	 * @param treeHtml data stream as string
 	 * @return this
 	 */
@@ -689,6 +695,7 @@ public class Node implements java.io.Serializable {
 
 	/**
 	 * Setze Conf-Datenstrom (Crawler-Settings)
+	 * 
 	 * @param conf datastream as string
 	 * @return this
 	 */
@@ -699,6 +706,7 @@ public class Node implements java.io.Serializable {
 
 	/**
 	 * Hole Conf-Datenstrom (Crawler-Settings)
+	 * 
 	 * @return the content of conf datastream in a string
 	 */
 	@JsonIgnore()
@@ -1076,21 +1084,19 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
-	 * @return true if the metadata contains one of the following predicates or if
-	 *         a doi is present at RELS-EXT -http://purl.org/lobid/lv#urn
-	 *         -http://geni-orca.renci.org/owl/topology.owl#hasURN -http: //
-	 *         purl.org/ontology/bibo/doi
+	 * @return wahr, wenn die Metadaten einen Identifikator enthalten, der in der
+	 *         HBZ-Verbunddatenbank verzeichnet ist (hbzID oder almaMmsId), oder
+	 *         eine DOI.
 	 * 
 	 */
 	public boolean hasPersistentIdentifier() {
-		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn",
+		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#hbzID",
 				getMetadata2())
-				|| RdfUtils.hasTriple(pid,
-						"http://geni-orca.renci.org/owl/topology.owl#hasURN",
+				|| RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#almaMmsId",
 						getMetadata2())
 				|| RdfUtils.hasTriple(pid, "http://purl.org/ontology/bibo/doi",
 						getMetadata2())
-				|| hasDoi() || hasUrn();
+				|| hasDoi();
 	}
 
 	/**
@@ -1098,7 +1104,7 @@ public class Node implements java.io.Serializable {
 	 */
 	public boolean hasUrnInMetadata() {
 		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn",
-				getMetadata2());
+				getMetadata2()) || hasUrn();
 	}
 
 	/**
