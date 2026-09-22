@@ -30,6 +30,9 @@ import play.cache.Cache;
 @IgnoreSizeOf
 public class RegalAction {
 
+	private static final int maxCacheMdLength = 1024 * 1024;
+	private static final int maxCacheRelations = 1000;
+
 	@SuppressWarnings("javadoc")
 	public Node updateIndex(String pid) {
 		removeNodeFromCache(pid);
@@ -43,6 +46,14 @@ public class RegalAction {
 	}
 
 	void writeNodeToCache(Node node) {
+		if (node == null || node.getPid() == null)
+			return;
+		if (node.getMetadata2() != null
+				&& node.getMetadata2().length() > maxCacheMdLength)
+			return;
+		if (node.getRelsExt() != null
+				&& node.getRelsExt().size() > maxCacheRelations)
+			return;
 		Cache.set(node.getPid(), node);
 	}
 
@@ -53,7 +64,8 @@ public class RegalAction {
 	@SuppressWarnings("javadoc")
 	protected String createAggregationUri(String pid) {
 		return Globals.useHttpUris
-				? Globals.protocol + Globals.server + "/resource/" + pid : pid;
+				? Globals.protocol + Globals.server + "/resource/" + pid
+				: pid;
 	}
 
 	/**
