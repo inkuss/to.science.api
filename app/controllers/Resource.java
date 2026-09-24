@@ -958,11 +958,18 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "text/html", nickname = "listTree", value = "listTree", notes = "Shows html data for tree view.", response = play.mvc.Result.class, httpMethod = "GET")
 	public static Promise<Result> listTree(@PathParam("pid") String pid) {
 		return new ReadMetadataAction().call(pid, node -> {
-			response().setHeader("Access-Control-Allow-Origin", "*");
-			String result = read.readTree(node);
-			if (result == null) {
-				return JsonMessage(new Message(
-						pid + " Baum-Ansicht noch nicht vorhanden; wird generiert.", 404));
+			String result = null;
+			try {
+				response().setHeader("Access-Control-Allow-Origin", "*");
+				String result = read.readTree(node);
+				play.Logger.debug("tree result: " + result);
+				if (result == null) {
+					return JsonMessage(new Message(
+							pid + " Baum-Ansicht noch nicht vorhanden; wird generiert.",
+							404));
+				}
+			} catch (Exception e) {
+				play.Logger.debug(e.getMessage());
 			}
 			return ok(result);
 		});
