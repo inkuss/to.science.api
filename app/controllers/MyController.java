@@ -419,9 +419,12 @@ public class MyController extends Controller {
 					Node node = null;
 					if (pid != null) {
 						node = read.readNode(pid);
+						play.Logger.debug("Read node for pid: " + pid);
 						Role role = Role.valueOf(ctx().session().get("role"));
+						play.Logger.debug("role: " + role.toString());
 						String publishScheme = node.getPublishScheme();
 						if (!readMetadata_accessIsAllowed(publishScheme, role)) {
+							play.Logger.debug("Access denied");
 							return AccessDenied();
 						}
 					}

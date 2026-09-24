@@ -961,18 +961,19 @@ public class Resource extends MyController {
 			String result = null;
 			try {
 				response().setHeader("Access-Control-Allow-Origin", "*");
-				String result = read.readTree(node);
+				result = read.readTree(node);
 				play.Logger.debug("tree result: " + result);
-				if (result == null) {
-					return JsonMessage(new Message(
-							pid + " Baum-Ansicht noch nicht vorhanden; wird generiert.",
-							404));
-				}
+				// if (result == null) {
+				// return JsonMessage(new Message(
+				// pid + " Baum-Ansicht noch nicht vorhanden; wird generiert.",
+				// 404));
+				// }
 			} catch (Exception e) {
 				play.Logger.debug(e.getMessage());
 			}
 			return ok(result);
 		});
+
 	}
 
 	@ApiOperation(produces = "application/json", nickname = "listParents", value = "listParents", notes = "Shows resources linkes with isPartOf", response = play.mvc.Result.class, httpMethod = "GET")
