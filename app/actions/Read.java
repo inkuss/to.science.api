@@ -630,7 +630,7 @@ public class Read extends RegalAction {
 			String confstring = node.getConf();
 			play.Logger.debug("confstring: " + confstring);
 			if (confstring == null)
-				return "";
+				return null;
 			ObjectMapper mapper = JsonUtil.mapper();
 			Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
 			if (node.getContentType().equals("version")
@@ -770,7 +770,7 @@ public class Read extends RegalAction {
 	 */
 	public String readTree(Node node) {
 		try {
-			play.Logger.debug("Beginn readTree");
+			// play.Logger.debug("Beginn readTree");
 			return node.getTreeHtml();
 		} catch (UrlConnectionException e) {
 			play.Logger.debug("readTree 404 Exception");

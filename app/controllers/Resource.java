@@ -966,7 +966,7 @@ public class Resource extends MyController {
 		return new ReadMetadataAction().call(pid, node -> {
 			response().setHeader("Access-Control-Allow-Origin", "*");
 			String result = read.readTree(node);
-			play.Logger.debug("tree result: " + result);
+			// play.Logger.debug("tree result: " + result);
 			return noContentOrOk(result, pid + " Baum-Ansicht noch nicht vorhanden.");
 		});
 
