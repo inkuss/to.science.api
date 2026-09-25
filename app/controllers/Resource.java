@@ -963,11 +963,10 @@ public class Resource extends MyController {
 				response().setHeader("Access-Control-Allow-Origin", "*");
 				result = read.readTree(node);
 				play.Logger.debug("tree result: " + result);
-				// if (result == null) {
-				// return JsonMessage(new Message(
-				// pid + " Baum-Ansicht noch nicht vorhanden; wird generiert.",
-				// 404));
-				// }
+				if (result == null) {
+					return JsonMessage(
+							new Message(pid + " Baum-Ansicht noch nicht vorhanden.", 200));
+				}
 			} catch (Exception e) {
 				play.Logger.debug(e.getMessage());
 			}
