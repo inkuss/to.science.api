@@ -35,11 +35,11 @@
  <bean id="simpleOverrides" class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
   <property name="properties">
    <value>
-metadata.operatorContactUrl=${OPERATOR_URL}
-metadata.jobName=${JOBNAME}
-metadata.description=${DESCRIPTION}
-metadata.robotsPolicyName=${ROBOTSPOLICY}
-metadata.userAgentTemplate=${USERAGENT}
+metadata.operatorContactUrl="${OPERATOR_URL}"
+metadata.jobName="${JOBNAME}"
+metadata.description="${DESCRIPTION}"
+metadata.robotsPolicyName="${ROBOTSPOLICY}"
+metadata.userAgentTemplate="${USERAGENT}"
 <!-- scope.rules.maxPathDepth=${MAXPATHDEPTH} -->
 <!-- disposition.minDelayMs=${MINDELAYMS} -->
    </value>
