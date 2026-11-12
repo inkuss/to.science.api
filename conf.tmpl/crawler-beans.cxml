@@ -3,7 +3,7 @@
   HERITRIX 3 CRAWL JOB CONFIGURATION FILE
   
    This is a relatively minimal configuration suitable for many crawls.
-   Modified by hbz June 2017
+   Modified by hbz June 2017 - 2026
    
    Commented-out beans and properties are provided as an example; values
    shown in comments reflect the actual defaults which are in effect
@@ -39,6 +39,9 @@ metadata.operatorContactUrl=${OPERATOR_URL}
 metadata.jobName=${JOBNAME}
 metadata.description=${DESCRIPTION}
 metadata.robotsPolicyName=${ROBOTSPOLICY}
+metadata.userAgentTemplate=${USERAGENT}
+<!-- scope.rules.maxPathDepth=${MAXPATHDEPTH} -->
+<!-- disposition.minDelayMs=${MINDELAYMS} -->
    </value>
   </property>
  </bean>
@@ -68,8 +71,7 @@ ${URL}
   <!-- <property name="operatorFrom" value=""/> -->
   <!-- <property name="organization" value=""/> -->
   <!-- <property name="audience" value=""/> -->
-  <!-- <property name="userAgentTemplate" 
-         value="Mozilla/5.0 (compatible; heritrix/@VERSION@ +@OPERATOR_CONTACT_URL@)"/> -->
+       <property name="userAgentTemplate" value="[see override above]"/>
        
  </bean>
  
@@ -171,7 +173,7 @@ ${URL}
     </bean>
     <!-- ...and REJECT those with more than threshold number of path-segments... -->
     <bean class="org.archive.modules.deciderules.TooManyPathSegmentsDecideRule">
-     <!-- <property name="maxPathDepth" value="20" /> -->
+	  <property name="maxPathDepth" value="${MAXPATHDEPTH}" />
     </bean>
     <!-- ...but always ACCEPT those marked as prerequisitee for another URI... -->
     <bean class="org.archive.modules.deciderules.PrerequisiteAcceptDecideRule">
@@ -358,7 +360,7 @@ ${URL}
  </bean>
  <bean id="disposition" class="org.archive.crawler.postprocessor.DispositionProcessor">
   <!-- <property name="delayFactor" value="5.0" /> -->
-  <!-- <property name="minDelayMs" value="3000" /> -->
+  <property name="minDelayMs" value="${MINDELAYMS}" />
   <!-- <property name="respectCrawlDelayUpToSeconds" value="300" /> -->
   <!-- <property name="maxDelayMs" value="30000" /> -->
   <!-- <property name="maxPerHostBandwidthUsageKbSec" value="0" /> -->

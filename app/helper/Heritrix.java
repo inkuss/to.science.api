@@ -162,7 +162,24 @@ public class Heritrix {
 			content = content.replaceAll("\\$\\{ROBOTSPOLICY\\}",
 					conf.getRobotsPolicy().toString());
 			content = content.replaceAll("\\$\\{DESCRIPTION\\}",
-					"Edoweb crawl of" + conf.getUrl());
+					"Edoweb crawl of " + conf.getUrl());
+			content = content.replaceAll("\\$\\{USERAGENT\\}", Gatherconf.agentTable
+					.get(conf.getAgentIdSelection()).replaceAll("%20", " "));
+			int level = conf.getDeepness();
+			if (level <= 0) {
+				level = 20; // Heritrix standard value
+			}
+			content =
+					content.replaceAll("\\$\\{MAXPATHDEPTH\\}", Integer.toString(level));
+			int waitSec = conf.getWaitSecBtRequests();
+			if (waitSec <= 0) {
+				waitSec = 3; // Heritrix standard value
+			}
+			/*
+			 * number of milliseconds heritrix waits between two requests
+			 */
+			content = content.replaceAll("\\$\\{MINDELAYMS\\}",
+					Integer.toString(waitSec * 1000));
 			content = content.replaceAll("\\$\\{URL\\}", conf.getUrl());
 			url_no_https = conf.getUrl().replaceAll("^http://|https://", "");
 			content = content.replaceAll("\\$\\{URL_NO_WWW\\}",
@@ -190,7 +207,6 @@ public class Heritrix {
 
 			return dir;
 		} catch (Exception e) {
-
 			throw new RuntimeException(e);
 		}
 	}
