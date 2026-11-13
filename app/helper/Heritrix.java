@@ -163,8 +163,16 @@ public class Heritrix {
 					conf.getRobotsPolicy().toString());
 			content = content.replaceAll("\\$\\{DESCRIPTION\\}",
 					"Edoweb crawl of " + conf.getUrl());
-			content = content.replaceAll("\\$\\{USERAGENT\\}", Gatherconf.agentTable
-					.get(conf.getAgentIdSelection()).replaceAll("%20", " "));
+			String agentIdRaw = Gatherconf.agentTable.get(conf.getAgentIdSelection());
+			/*
+			 * beim UserAgent die Klammer am Ende entfernen und stattdessen die für
+			 * Heritrix erforderliche Schablone (Template) anfügen, und die Klammer
+			 * wieder schließen.
+			 */
+			String agentIdHeritrix = agentIdRaw.substring(0, agentIdRaw.length() - 1)
+					.concat("%20+@OPERATOR_CONTACT_URL@)");
+			content = content.replaceAll("\\$\\{USERAGENT\\}",
+					agentIdHeritrix.replaceAll("%20", " "));
 			int level = conf.getDeepness();
 			if (level <= 0) {
 				level = 20; // Heritrix standard value
