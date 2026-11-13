@@ -157,7 +157,7 @@ public class Heritrix {
 			Charset charset = StandardCharsets.UTF_8;
 			String content = new String(Files.readAllBytes(path), charset);
 			content = content.replaceAll("\\$\\{OPERATOR_URL\\}",
-					"https://www.edoweb-rlp.de");
+					"https://toscience.hbz-nrw.de/crawler");
 			content = content.replaceAll("\\$\\{JOBNAME\\}", conf.getName());
 			content = content.replaceAll("\\$\\{ROBOTSPOLICY\\}",
 					conf.getRobotsPolicy().toString());
@@ -165,12 +165,12 @@ public class Heritrix {
 					"Edoweb crawl of " + conf.getUrl());
 			String agentIdRaw = Gatherconf.agentTable.get(conf.getAgentIdSelection());
 			/*
-			 * beim UserAgent die Klammer am Ende entfernen und stattdessen die für
-			 * Heritrix erforderliche Schablone (Template) anfügen, und die Klammer
-			 * wieder schließen.
+			 * in der crawler-beans.cxml muss die Schablone für den Betreiber-Kontakt
+			 * verwendet werden. Diese wird von Heritrix dann wieder durch die obige
+			 * OPERATOR_URL ersetzt.
 			 */
-			String agentIdHeritrix = agentIdRaw.substring(0, agentIdRaw.length() - 1)
-					.concat("%20+@OPERATOR_CONTACT_URL@)");
+			String agentIdHeritrix = agentIdRaw.replaceAll(
+					"https://toscience.hbz-nrw.de/crawler", "@OPERATOR_CONTACT_URL@");
 			content = content.replaceAll("\\$\\{USERAGENT\\}",
 					agentIdHeritrix.replaceAll("%20", " "));
 			int level = conf.getDeepness();
